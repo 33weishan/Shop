@@ -1,87 +1,25 @@
-<!doctype html>
-<html lang="zh-Hant">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>測試商城 V4</title>
-<style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f4fb;color:#202124}
-header{position:sticky;top:0;background:#fff;padding:20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;z-index:5}
-h1{font-size:25px;margin:0}.badge{font-size:14px;background:#eee;padding:5px 10px;border-radius:20px}.cartbtn,.primary{background:#6842c2;color:#fff;border:0;border-radius:16px;padding:13px 18px;font-weight:800;font-size:16px}
-main{max-width:760px;margin:auto;padding:20px}.hero{background:linear-gradient(135deg,#6842c2,#9274dc);color:#fff;padding:26px;border-radius:24px;margin-bottom:18px}
-.hero h2{font-size:30px;margin:0 0 8px}.status{font-size:14px;margin-top:10px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
-.card{background:#fff;border-radius:22px;padding:18px}.name{font-size:20px;font-weight:800}.stock{color:#777;margin:7px 0 15px}.add{width:100%;border:0;border-radius:14px;padding:12px;background:#6842c2;color:#fff;font-weight:800}
-.add:disabled{background:#ccc}.panel{background:#fff;border-radius:22px;padding:20px;margin-top:18px}.row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #eee}
-.qty button{border:0;border-radius:9px;padding:7px 11px;font-size:17px}.qty span{display:inline-block;min-width:30px;text-align:center}
-input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:12px;font-size:16px;margin:6px 0 13px}.hidden{display:none}
-.total{font-size:20px;font-weight:800;margin:18px 0}.note{font-size:13px;color:#777;line-height:1.5}.success{font-size:25px;font-weight:900;margin-bottom:12px}
-@media(max-width:520px){.grid{grid-template-columns:1fr}header{padding:16px}main{padding:14px}}
-</style></head>
-<body>
-<header><div><h1>測試商城 <span class="badge">V4</span></h1></div><button class="cartbtn" onclick="showCart()">購物車 <span id="cartCount">0</span></button></header>
-<main>
-<section id="shop">
-<div class="hero"><h2>線上選購測試</h2><div>Google Sheets 即時庫存・購物車・取貨流程</div><div id="sync" class="status">⏳ 正在同步庫存…</div></div>
-<div id="products" class="grid"></div>
-</section>
-
-<section id="cart" class="hidden">
-<div class="panel"><h2>購物車</h2><div id="cartItems"></div><div class="total">共 <span id="totalQty">0</span> 件</div>
-<button class="primary" style="width:100%" onclick="checkout()">填寫取貨資料</button>
-<button onclick="backShop()" style="width:100%;margin-top:10px;padding:12px;border:0;background:#eee;border-radius:14px">繼續購物</button></div>
-</section>
-
-<section id="form" class="hidden">
-<div class="panel"><h2>取貨資料</h2>
-<label>姓名</label><input id="name" placeholder="請輸入姓名">
-<label>電話</label><input id="phone" inputmode="tel" placeholder="09xxxxxxxx">
-<label>取貨方式</label><select id="carrier"><option>7-ELEVEN 店到店（測試）</option><option>全家店到店（測試）</option></select>
-<label>取貨門市</label><input id="store" placeholder="例如：英海門市">
-<p class="note">目前為前端測試流程，不會送出真實物流訂單，也不會扣除 Google Sheets 雲端庫存。</p>
-<button class="primary" style="width:100%" onclick="placeOrder()">建立測試訂單</button></div>
-</section>
-
-<section id="done" class="hidden"><div class="panel"><div class="success">✓ 測試訂單成立</div><div id="receipt"></div><p class="note">此訂單只存在目前瀏覽器測試流程，尚未串接真實物流或付款。</p><button class="primary" style="width:100%" onclick="resetShop()">繼續購物</button></div></section>
-</main>
-<script>
-const CSV="https://docs.google.com/spreadsheets/d/1I1i9bTTNYsNlg8qkSi9VLOmci-IplxfBANU-cEJDFoc/export?format=csv&gid=1126994590";
-let products=[], cart={};
-
-function parseCSV(t){let a=[],r=[],c="",q=false;for(let i=0;i<t.length;i++){let x=t[i],n=t[i+1];if(x=='"'&&q&&n=='"'){c+='"';i++}else if(x=='"')q=!q;else if(x==','&&!q){r.push(c);c=""}else if((x=='\n'||x=='\r')&&!q){if(x=='\r'&&n=='\n')i++;r.push(c);c="";if(r.some(v=>v.trim()))a.push(r);r=[]}else c+=x}if(c||r.length){r.push(c);if(r.some(v=>v.trim()))a.push(r)}return a}
-
-async function load(){
- try{
-  let res=await fetch(CSV+"&_="+Date.now(),{cache:"no-store"}); if(!res.ok) throw Error(res.status);
-  let rows=parseCSV(await res.text()).slice(1);
-  products=rows.filter(r=>(r[0]||"").trim()).map((r,i)=>({id:i,name:(r[0]||"").trim(),stock:Math.max(0,parseInt(r[1])||0)}));
-  document.getElementById("sync").textContent="✅ Google Sheets 已同步｜"+products.length+" 項｜"+new Date().toLocaleTimeString("zh-TW");
-  renderProducts();
- }catch(e){document.getElementById("sync").textContent="❌ 庫存同步失敗，請檢查試算表共用權限";}
-}
-function renderProducts(){
- let el=document.getElementById("products");
- el.innerHTML=products.map(p=>`<div class="card"><div class="name">${esc(p.name)}</div><div class="stock">庫存 ${p.stock}</div><button class="add" ${p.stock<1?"disabled":""} onclick="add(${p.id})">${p.stock<1?"已售完":"加入購物車"}</button></div>`).join("");
-}
-function add(id){let p=products.find(x=>x.id===id),q=cart[id]||0;if(q<p.stock)cart[id]=q+1;updateCount()}
-function updateCount(){document.getElementById("cartCount").textContent=Object.values(cart).reduce((a,b)=>a+b,0)}
-function showOnly(id){["shop","cart","form","done"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));scrollTo(0,0)}
-function showCart(){renderCart();showOnly("cart")}
-function renderCart(){
- let ids=Object.keys(cart).filter(id=>cart[id]>0),el=document.getElementById("cartItems");
- if(!ids.length) el.innerHTML="<p>購物車目前沒有商品。</p>";
- else el.innerHTML=ids.map(id=>{let p=products.find(x=>x.id==id);return `<div class="row"><div><b>${esc(p.name)}</b><br><small>庫存 ${p.stock}</small></div><div class="qty"><button onclick="chg(${id},-1)">−</button><span>${cart[id]}</span><button onclick="chg(${id},1)">＋</button></div></div>`}).join("");
- document.getElementById("totalQty").textContent=Object.values(cart).reduce((a,b)=>a+b,0)
-}
-function chg(id,d){let p=products.find(x=>x.id==id);cart[id]=Math.max(0,Math.min(p.stock,(cart[id]||0)+d));if(!cart[id])delete cart[id];updateCount();renderCart()}
-function backShop(){showOnly("shop")}
-function checkout(){if(!Object.values(cart).some(x=>x>0)){alert("請先加入商品");return}showOnly("form")}
-function placeOrder(){
- let n=document.getElementById("name").value.trim(),ph=document.getElementById("phone").value.trim(),st=document.getElementById("store").value.trim(),ca=document.getElementById("carrier").value;
- if(!n||!ph||!st){alert("請填寫姓名、電話與取貨門市");return}
- let qty=Object.values(cart).reduce((a,b)=>a+b,0),no="TEST-"+String(Date.now()).slice(-8);
- document.getElementById("receipt").innerHTML=`訂單編號 <b>${no}</b><br>共 ${qty} 件<br>${esc(ca)} / ${esc(st)}<br>收件人：${esc(n)}`;
- showOnly("done");
-}
-function resetShop(){cart={};updateCount();showOnly("shop");load()}
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>測試商城 V4.1</title>
+<style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f4fb;color:#222}header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #eee;padding:16px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:22px;font-weight:900}.badge{font-size:12px;background:#eee;padding:4px 8px;border-radius:12px}.purple{border:0;background:#6842c2;color:#fff;font-weight:800;border-radius:14px;padding:12px 15px}.wrap{max-width:760px;margin:auto;padding:14px}.hero{background:linear-gradient(135deg,#6842c2,#9879e4);color:#fff;border-radius:22px;padding:22px;margin-bottom:14px}.hero h1{margin:0 0 7px}.sync{font-size:13px;margin-top:8px}.tabs{display:flex;gap:8px;overflow:auto;padding:2px 0 12px}.tab{white-space:nowrap;border:1px solid #ddd;background:#fff;padding:10px 13px;border-radius:18px;font-weight:700}.tab.on{background:#222;color:#fff}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card,.panel{background:#fff;border-radius:18px;padding:16px}.name{font-size:18px;font-weight:800}.stock{font-size:14px;color:#777;margin:6px 0 13px}.add{width:100%;border:0;border-radius:12px;background:#6842c2;color:#fff;font-weight:800;padding:11px}.add:disabled{background:#ccc}.hidden{display:none}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #eee}.qty button{border:0;border-radius:9px;padding:7px 11px}.qty span{display:inline-block;min-width:30px;text-align:center}input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:12px;font-size:16px;margin:6px 0 13px}.wide{width:100%;margin-top:10px}.muted{font-size:13px;color:#777;line-height:1.5}@media(max-width:520px){.grid{grid-template-columns:1fr}}</style></head>
+<body><header><div class="brand">測試商城 <span class="badge">V4.1</span></div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
+<main class="wrap">
+<section id="shop"><div class="hero"><h1>四分類即時庫存</h1><div>A/B、C/D、E/F、G/H 全部同步</div><div class="sync" id="sync">⏳ 同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
+<section id="cart" class="hidden"><div class="panel"><h2>購物車</h2><div id="rows"></div><p><b>共 <span id="tq">0</span> 件</b></p><button class="purple wide" onclick="checkout()">填寫取貨資料</button><button class="wide" onclick="show('shop')">繼續購物</button></div></section>
+<section id="form" class="hidden"><div class="panel"><h2>取貨資料</h2><label>姓名</label><input id="nm"><label>電話</label><input id="ph" inputmode="tel"><label>配送</label><select id="ship"><option>7-ELEVEN 店到店（測試）</option><option>全家店到店（測試）</option></select><label>門市</label><input id="store"><p class="muted">測試版不建立真實物流單，也不回寫雲端庫存。</p><button class="purple wide" onclick="order()">建立測試訂單</button></div></section>
+<section id="done" class="hidden"><div class="panel"><h2>✓ 測試訂單成立</h2><div id="receipt"></div><button class="purple wide" onclick="reset()">繼續購物</button></div></section>
+</main><script>
+const U="https://docs.google.com/spreadsheets/d/1I1i9bTTNYsNlg8qkSi9VLOmci-IplxfBANU-cEJDFoc/export?format=csv&gid=1126994590";let groups=[],active=0,cart={};
+function csv(t){let a=[],r=[],c="",q=false;for(let i=0;i<t.length;i++){let x=t[i],n=t[i+1];if(x=='"'&&q&&n=='"'){c+='"';i++}else if(x=='"')q=!q;else if(x==','&&!q){r.push(c);c=""}else if((x=='\n'||x=='\r')&&!q){if(x=='\r'&&n=='\n')i++;r.push(c);c="";if(r.some(v=>v.trim()))a.push(r);r=[]}else c+=x}if(c||r.length){r.push(c);if(r.some(v=>v.trim()))a.push(r)}return a}
+async function load(){try{let z=await fetch(U+"&_="+Date.now(),{cache:"no-store"}),all=csv(await z.text()),head=all[0]||[],rows=all.slice(1),pairs=[[0,1],[2,3],[4,5],[6,7]];groups=pairs.map(([a,b],g)=>({name:(head[a]||("分類"+(g+1))).trim(),items:rows.filter(r=>(r[a]||"").trim()).map((r,i)=>({key:g+"-"+i,name:(r[a]||"").trim(),stock:Math.max(0,parseInt(r[b])||0)}))}));document.getElementById("sync").textContent="✅ Google Sheets 已同步｜"+groups.map(x=>x.items.length).join(" / ")+" 筆｜"+new Date().toLocaleTimeString("zh-TW");renderTabs();render()}catch(e){document.getElementById("sync").textContent="❌ 同步失敗"}}
+function renderTabs(){document.getElementById("tabs").innerHTML=groups.map((g,i)=>`<button class="tab ${i===active?"on":""}" onclick="active=${i};renderTabs();render()">${esc(g.name)}</button>`).join("")}
+function render(){let g=groups[active];document.getElementById("products").innerHTML=(g?.items||[]).map(p=>`<div class="card"><div class="name">${esc(p.name)}</div><div class="stock">庫存 ${p.stock}</div><button class="add" ${p.stock<1?"disabled":""} onclick="add('${p.key}')">${p.stock<1?"已售完":"加入購物車"}</button></div>`).join("")}
+function find(k){for(let g of groups){let p=g.items.find(x=>x.key===k);if(p)return {...p,group:g.name}}}
+function add(k){let p=find(k),q=cart[k]||0;if(q<p.stock)cart[k]=q+1;count()}
+function count(){document.getElementById("cc").textContent=Object.values(cart).reduce((a,b)=>a+b,0)}
+function show(id){["shop","cart","form","done"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));scrollTo(0,0)}
+function showCart(){let ids=Object.keys(cart),el=document.getElementById("rows");el.innerHTML=ids.length?ids.map(k=>{let p=find(k);return `<div class="row"><div><b>${esc(p.name)}</b><div class="muted">${esc(p.group)}｜庫存 ${p.stock}</div></div><div class="qty"><button onclick="chg('${k}',-1)">−</button><span>${cart[k]}</span><button onclick="chg('${k}',1)">＋</button></div></div>`}).join(""):"<p>購物車目前是空的。</p>";document.getElementById("tq").textContent=Object.values(cart).reduce((a,b)=>a+b,0);show("cart")}
+function chg(k,d){let p=find(k),n=(cart[k]||0)+d;if(n<=0)delete cart[k];else cart[k]=Math.min(n,p.stock);count();showCart()}
+function checkout(){if(!Object.keys(cart).length)return alert("請先加入商品");show("form")}
+function order(){let n=document.getElementById("nm").value.trim(),p=document.getElementById("ph").value.trim(),s=document.getElementById("store").value.trim();if(!n||!p||!s)return alert("請填完整資料");document.getElementById("receipt").innerHTML="訂單編號 <b>TEST-"+String(Date.now()).slice(-8)+"</b><br>共 "+Object.values(cart).reduce((a,b)=>a+b,0)+" 件<br>"+esc(document.getElementById("ship").value)+" / "+esc(s);show("done")}
+function reset(){cart={};count();show("shop");load()}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-load();
-</script></body></html>
+load();</script></body></html>

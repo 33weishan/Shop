@@ -9,10 +9,12 @@
 <label>手機號碼</label><input id="phone" inputmode="tel" maxlength="10" placeholder="09xxxxxxxx">
 <label>取貨超商</label>
 <input id="storeType" value="7-ELEVEN" readonly>
-<label>7-ELEVEN 門市店號（6碼）</label>
-<input id="storeName" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" placeholder="例如：123456">
-<a class="purple wide" style="display:block;text-align:center;text-decoration:none" href="https://emap.pcsc.com.tw/mobilemap/Id/Default.aspx" target="_blank" rel="noopener">查詢 7-ELEVEN 門市店號</a>
-<p class="muted">查到門市後，請把 6 碼門市店號填在上方。</p>
+<label>7-ELEVEN 門市店號</label>
+<input id="storeName" inputmode="numeric" maxlength="6" placeholder="請輸入6碼門市店號" oninput="storeChanged()">
+<a class="purple wide" style="display:block;text-align:center;text-decoration:none" href="https://emap.pcsc.com.tw/emap.aspx" target="_blank" rel="noopener">不知道店號？查詢 7-ELEVEN 門市</a>
+<div id="storeVerify" class="result hidden"></div>
+<label style="display:block;margin-top:12px"><input id="storeConfirm" type="checkbox" style="width:auto;margin-right:7px" disabled>我已確認這是我要取貨的門市</label>
+<p class="muted">目前先驗證6碼格式；門市名稱與地址資料來源會獨立接入，不會假裝成即時官方驗證。</p>
 <div id="msg" class="result hidden"></div>
 <button id="orderBtn" class="purple wide" onclick="submitOrder()">確認送出訂單</button>
 <button class="wide" onclick="showCart()">返回購物車</button>
@@ -44,12 +46,29 @@ function makeId(){return "ORD-"+Date.now()+"-"+Math.random().toString(36).slice(
 function postNoCors(payload){return fetch(API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)})}
 function checkStatus(orderId){return new Promise((resolve,reject)=>{let cb="cb_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),s=document.createElement("script"),timer;window[cb]=d=>{cleanup();resolve(d)};function cleanup(){clearTimeout(timer);delete window[cb];s.remove()}s.onerror=()=>{cleanup();reject(Error("查詢失敗"))};timer=setTimeout(()=>{cleanup();reject(Error("查詢逾時"))},8000);s.src=API+"?orderId="+encodeURIComponent(orderId)+"&callback="+cb+"&_="+Date.now();document.body.appendChild(s)})}
 async function waitResult(id){for(let i=0;i<12;i++){try{let d=await checkStatus(id);if(d.status==="completed"||d.status==="failed")return d}catch(e){}await new Promise(r=>setTimeout(r,1000))}throw Error("訂單已送出，但暫時無法確認結果。請勿重複送出")}
+function storeChanged(){
+ let v=document.getElementById("storeName").value.replace(/\D/g,"").slice(0,6);
+ document.getElementById("storeName").value=v;
+ let box=document.getElementById("storeVerify"),ck=document.getElementById("storeConfirm");
+ ck.checked=false; ck.disabled=true;
+ if(!v){box.classList.add("hidden");return}
+ box.classList.remove("hidden");
+ if(v.length<6){box.innerHTML="請輸入完整6碼門市店號";return}
+ box.innerHTML="✓ 店號格式正確：<b>"+esc(v)+"</b><br><span class='muted'>請使用上方 7-ELEVEN 官方門市查詢確認店名與地址。</span>";
+ ck.disabled=false;
+}
 async function submitOrder(){if(sending)return;let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\s/g,""),storeType=document.getElementById("storeType").value,storeName=document.getElementById("storeName").value.trim(),m=document.getElementById("msg");
-if(!name)return alert("請填寫姓名");if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");if(!storeType)return alert("請選擇取貨超商");if(!/^\\d{6}$/.test(storeName))return alert("請輸入 6 碼 7-ELEVEN 門市店號");
+if(!name)return alert("請填寫姓名");if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");if(!storeType)return alert("請選擇取貨超商");
+if(!/^\d{6}$/.test(storeName))return alert("請輸入6碼 7-ELEVEN 門市店號");
+if(!document.getElementById("storeConfirm").checked)return alert("請先確認取貨門市");
 let items=Object.keys(cart).map(k=>({productName:find(k).name,quantity:cart[k]})),orderId=makeId();sending=true;let b=document.getElementById("orderBtn");b.disabled=true;m.classList.remove("hidden");m.textContent="訂單送出中，請勿重複按…";
 try{await postNoCors({orderId,customer:{name,phone,storeType,storeName},items});let d=await waitResult(orderId);if(!d.success){m.textContent="❌ "+(d.message||"訂單失敗");await load();return}
 document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)}</b><br>姓名：${esc(d.customer.name)}<br>手機：${esc(d.customer.phone)}<br>取貨超商：${esc(d.customer.storeType)}<br>取貨門市：${esc(d.customer.storeName)}<br><br>商品：<br>`+d.items.map(x=>`${esc(x.productName)} × ${x.quantity}`).join("<br>");
 cart={};count();await load();show("done")}catch(e){m.textContent="⚠️ "+e.message+"（訂單編號："+orderId+"）"}finally{sending=false;b.disabled=false}}
-function finish(){document.getElementById("name").value="";document.getElementById("phone").value="";document.getElementById("storeType").value="";document.getElementById("storeName").value="";document.getElementById("msg").classList.add("hidden");show("shop")}
+function finish(){document.getElementById("name").value="";document.getElementById("phone").value="";document.getElementById("storeType").value="";document.getElementById("storeName").value="";
+document.getElementById("storeConfirm").checked=false;
+document.getElementById("storeConfirm").disabled=true;
+document.getElementById("storeVerify").classList.add("hidden");
+document.getElementById("msg").classList.add("hidden");show("shop")}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 load();</script></body></html>

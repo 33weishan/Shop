@@ -2,7 +2,7 @@
 <style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f4fb;color:#222}header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #eee;padding:16px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:22px;font-weight:900}.badge{font-size:12px;background:#eee;padding:4px 8px;border-radius:12px}.purple{border:0;background:#6842c2;color:#fff;font-weight:800;border-radius:14px;padding:12px 15px}.wrap{max-width:760px;margin:auto;padding:14px}.hero{background:linear-gradient(135deg,#6842c2,#9879e4);color:#fff;border-radius:22px;padding:22px;margin-bottom:14px}.tabs{display:flex;gap:8px;overflow:auto;padding:2px 0 12px}.tab{white-space:nowrap;border:1px solid #ddd;background:#fff;padding:10px 13px;border-radius:18px;font-weight:700}.tab.on{background:#222;color:#fff}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card,.panel{background:#fff;border-radius:18px;padding:16px}.name{font-size:18px;font-weight:800}.stock,.muted{font-size:13px;color:#777}.stock{margin:6px 0 13px}.add{width:100%;border:0;border-radius:12px;background:#6842c2;color:#fff;font-weight:800;padding:11px}.add:disabled{background:#ccc}.hidden{display:none}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #eee}.qty{display:flex;align-items:center;gap:7px}.qty button{border:0;border-radius:9px;padding:8px 12px;font-size:18px}.qty input{width:64px;margin:0;padding:8px 5px;text-align:center;border:1px solid #ddd;border-radius:9px;font-size:17px}.catTitle{font-size:17px;font-weight:900;padding:16px 0 5px;border-bottom:2px solid #eee}.backBtn{border:0;background:transparent;font-size:18px;font-weight:800;padding:4px 0 14px}.wide{width:100%;margin-top:10px}input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:12px;font-size:16px;margin:6px 0 12px;background:#fff}label{font-weight:800}.result{padding:13px;border-radius:12px;background:#f2f2f2;margin-top:12px}.summary{line-height:1.8}@media(max-width:520px){.grid{grid-template-columns:1fr}}</style></head>
 <body><header><div class="brand">商城</div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
 <main class="wrap">
-<section id="shop"><div class="hero"><h1>🤍可人糖果💙</h1><div>指定棒棒糖顏色加購$150</div><div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
+<section id="shop"><div class="hero"><h1>🤍香氛精油💙</h1><div>加購$150指定主機顏色</div><div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
 <section id="cart" class="hidden"><div class="panel"><button class="backBtn" onclick="show('shop')">← 返回購物</button><h2>購物車</h2><div id="rows"></div><p><b>共 <span id="tq">0</span> 件</b></p><button class="purple wide" onclick="goCheckout()">前往填寫取貨資料</button><button class="wide" onclick="show('shop')">繼續購物</button></div></section>
 <section id="checkout" class="hidden"><div class="panel"><h2>取貨資料</h2>
 <label>姓名</label><input id="name" autocomplete="name" placeholder="請輸入姓名">
@@ -24,34 +24,34 @@
 const CSV="https://docs.google.com/spreadsheets/d/1I1i9bTTNYsNlg8qkSi9VLOmci-IplxfBANU-cEJDFoc/export?format=csv&gid=121866907";
 const API="https://script.google.com/macros/s/AKfycbxyJSU-_4X3gOCRvfEoEhe2ETWkQjXBcHCTIco4BubYDziINuOYCwLPaCvvzTrimUDU/exec";
 const SPECS=[
- {label:"分類1",nameCol:0,stockCol:1,start:5,end:38},
- {label:"分類2",nameCol:6,stockCol:7,start:5,end:28},
- {label:"分類3",nameCol:9,stockCol:10,start:5,end:31},
- {label:"分類4",nameCol:12,stockCol:13,start:5,end:24},
- {label:"分類5",custom:true}
+ {label:"悅刻🥚",nameCol:0,stockCol:1,start:5,end:38},
+ {label:"ILIA拋棄式6500口",nameCol:6,stockCol:7,start:5,end:28},
+ {label:"悅刻8000口拋棄式免充",nameCol:9,stockCol:10,start:5,end:31},
+ {label:"悅刻12000口拋棄式需充電",nameCol:12,stockCol:13,start:5,end:24},
+ {label:"主機",custom:true}
 ];
 let groups=[],active=0,cart={},sending=false;
 
 const PACKAGES={
- "分類1":[
-  {id:"c1a",label:"10顆贈五棒棒糖（不挑口味）",price:1500,target:10},
-  {id:"c1b",label:"20顆贈六棒棒糖（不挑口味）",price:3000,target:20},
-  {id:"c1c",label:"10顆贈3顆",price:1500,target:13},
-  {id:"c1d",label:"20顆贈6顆",price:2900,target:26},
-  {id:"c1e",label:"30顆贈9顆",price:4200,target:39},
-  {id:"c1f",label:"60顆贈15顆｜代理價",price:7800,target:75}
+ "悅刻🥚":[
+  {id:"c1a",label:"10顆送五代主機（不挑顏色）",price:1500,target:10},
+  {id:"c1b",label:"20顆送六代主機（不挑顏色）",price:3000,target:20},
+  {id:"c1c",label:"10顆送3顆",price:1500,target:13},
+  {id:"c1d",label:"20顆送6顆",price:2900,target:26},
+  {id:"c1e",label:"30顆送9顆",price:4200,target:39},
+  {id:"c1f",label:"60顆送15顆｜代理價",price:7800,target:75}
  ],
- "分類2":[
+ "ILIA拋棄式6500口":[
   {id:"c2a",label:"🔆 3入",price:1000,target:3},
   {id:"c2b",label:"🔆 5入",price:1500,target:5},
   {id:"c2c",label:"🔆 10入｜代理價",price:2500,target:10}
  ],
- "分類3":[
+ "悅刻8000口拋棄式免充":[
   {id:"c3a",label:"⚡️ 3入",price:1100,target:3},
   {id:"c3b",label:"⚡️ 5入",price:1500,target:5},
   {id:"c3c",label:"⚡️ 10入｜代理價",price:2800,target:10}
  ],
- "分類4":[
+ "悅刻12000口拋棄式需充電":[
   {id:"c4a",label:"🆕 3入",price:1100,target:3},
   {id:"c4b",label:"🆕 5入",price:1500,target:5},
   {id:"c4c",label:"🆕 10入｜代理價",price:2800,target:10}
@@ -68,7 +68,7 @@ async function load(){try{
    if(!s.custom) return {name:s.label,items:all.slice(s.start,s.end+1).filter(r=>(r[s.nameCol]||"").trim()).map((r,i)=>({key:g+"-"+i,name:(r[s.nameCol]||"").trim(),stock:Math.max(0,parseInt(r[s.stockCol])||0)}))};
    let five=all.slice(5,13).filter(r=>(r[3]||"").trim()).map((r,i)=>({key:"4-five-"+i,name:(r[3]||"").trim(),stock:Math.max(0,parseInt(r[4])||0),sub:"五棒棒糖",price:800}));
    let six=all.slice(22,28).filter(r=>(r[3]||"").trim()).map((r,i)=>({key:"4-six-"+i,name:(r[3]||"").trim(),stock:Math.max(0,parseInt(r[4])||0),sub:"六棒棒糖",price:1200}));
-   return {name:"分類5",items:[...five,...six]};
+   return {name:"主機",items:[...five,...six]};
  });
  document.getElementById("sync").textContent="✓ 庫存已更新";renderTabs();ensureCandyTitle();render()
 }catch(e){document.getElementById("sync").textContent="庫存同步失敗"}}
@@ -82,16 +82,16 @@ function ensureCandyTitle(){
    t.id="candyTitle";
    t.className="panel";
    t.style.cssText="margin-bottom:14px;text-align:center";
-   t.innerHTML='<h1 style="margin:0">糖果</h1>';
+   t.innerHTML='<h1 style="margin:0">香水</h1>';
  }
  if(tabs.parentNode) tabs.parentNode.insertBefore(t,tabs);
 }
 function render(){
  let g=groups[active],cat=SPECS[active].label,box=document.getElementById("products");
- if(cat==="分類5"){
+ if(cat==="主機"){
    box.style.display="block";
-   box.innerHTML=["五棒棒糖","六棒棒糖"].map(sub=>{
-     let price=sub==="五棒棒糖"?800:1200,items=g.items.filter(p=>p.sub===sub);
+   box.innerHTML=["五代主機","六代主機"].map(sub=>{
+     let price=sub==="五代主機"?800:1200,items=g.items.filter(p=>p.sub===sub);
      return `<div class="panel" style="margin-bottom:14px"><h2>${sub}｜$${price}／包</h2><div class="grid">`+
        items.map(p=>productPicker(p,cat,true)).join("")+`</div></div>`;
    }).join("");
@@ -111,10 +111,10 @@ function draftTotal(cat){let gi=SPECS.findIndex(x=>x.label===cat);return Object.
 function pick(k,d,cat,isC5){let p=find(k),n=Math.max(0,(draft[k]||0)+d);if(!isC5){let cp=chosenPackage[cat],other=draftTotal(cat)-(draft[k]||0);n=Math.min(n,Math.max(0,cp.target-other))}draft[k]=Math.min(n,p.stock);render()}
 function pickSet(k,v,cat,isC5){let p=find(k),n=Math.max(0,parseInt(v,10)||0);if(!isC5){let cp=chosenPackage[cat],other=draftTotal(cat)-(draft[k]||0);n=Math.min(n,Math.max(0,cp.target-other))}draft[k]=Math.min(n,p.stock);render()}
 function addPackage(cat){let cp=chosenPackage[cat];if(!cp)return;if(draftTotal(cat)!==cp.target)return alert("必須剛好選滿 "+cp.target+" 顆");let gi=SPECS.findIndex(x=>x.label===cat),items=[];Object.entries(draft).forEach(([k,q])=>{if(q>0&&k.startsWith(gi+"-"))items.push({key:k,qty:q})});let bundleKey="B-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);cart[bundleKey]={bundle:true,category:cat,packageId:cp.id,packageLabel:cp.label,price:cp.price,target:cp.target,items};items.forEach(x=>delete draft[x.key]);count();showCart()}
-function addC5(k){let q=draft[k]||0,p=find(k);if(q<=0)return alert("請先選擇數量");let bundleKey="C5-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);cart[bundleKey]={bundle:true,category:"分類5",packageLabel:p.sub,price:p.price,target:q,items:[{key:k,qty:q}]};draft[k]=0;count();showCart()}
+function addC5(k){let q=draft[k]||0,p=find(k);if(q<=0)return alert("請先選擇數量");let bundleKey="C5-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);cart[bundleKey]={bundle:true,category:"主機",packageLabel:p.sub,price:p.price,target:q,items:[{key:k,qty:q}]};draft[k]=0;count();showCart()}
 function find(k){for(let g of groups){let p=g.items.find(x=>x.key===k);if(p)return p}}
 function add(k){let p=find(k),q=cart[k]||0;if(q<p.stock)cart[k]=q+1;count()}
-function orderTotal(){return Object.values(cart).reduce((s,b)=>s+(b.category==="分類5"?Number(b.price||0)*Number(b.target||0):Number(b.price||0)),0)}
+function orderTotal(){return Object.values(cart).reduce((s,b)=>s+(b.category==="主機"?Number(b.price||0)*Number(b.target||0):Number(b.price||0)),0)}
 function count(){document.getElementById("cc").textContent=Object.values(cart).reduce((s,b)=>s+(b.bundle?b.items.reduce((a,x)=>a+x.qty,0):b),0)}
 function show(id){["shop","cart","checkout","done"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));scrollTo(0,0)}
 function showCart(){
@@ -122,12 +122,12 @@ function showCart(){
  if(!entries.length)el.innerHTML="<p>購物車目前是空的。</p>";
  else{
   let grouped={};entries.forEach(([k,b])=>{let cat=b.category||"其他";(grouped[cat]||(grouped[cat]=[])).push([k,b])});
-  el.innerHTML=Object.entries(grouped).map(([cat,arr])=>`<div class="catTitle">${esc(cat)}</div>`+arr.map(([bk,b])=>`<div class="card" style="margin:10px 0"><b>${esc(b.packageLabel)}｜$${b.price}</b>${b.category==="分類5"?` <span class="muted">／包</span>`:""}<div class="muted" style="margin-top:7px">${b.items.map(x=>{let p=find(x.key);return esc(p.name)+" × "+x.qty}).join("、")}</div><button style="margin-top:10px" onclick="delete cart['${bk}'];count();showCart()">刪除此套組</button></div>`).join("")).join("");
+  el.innerHTML=Object.entries(grouped).map(([cat,arr])=>`<div class="catTitle">${esc(cat)}</div>`+arr.map(([bk,b])=>`<div class="card" style="margin:10px 0"><b>${esc(b.packageLabel)}｜$${b.price}</b>${b.category==="主機"?` <span class="muted">／包</span>`:""}<div class="muted" style="margin-top:7px">${b.items.map(x=>{let p=find(x.key);return esc(p.name)+" × "+x.qty}).join("、")}</div><button style="margin-top:10px" onclick="delete cart['${bk}'];count();showCart()">刪除此套組</button></div>`).join("")).join("");
  }
  document.getElementById("tq").textContent=Object.values(cart).reduce((s,b)=>s+b.items.reduce((a,x)=>a+x.qty,0),0);
  let totalBox=document.getElementById("orderTotalBox");
  if(!totalBox){totalBox=document.createElement("div");totalBox.id="orderTotalBox";totalBox.className="result";document.getElementById("tq").parentElement.appendChild(totalBox)}
- totalBox.innerHTML="<b>訂單總金額：$"+orderTotal().toLocaleString()+"</b><br>商品：糖果｜溫層：常溫";
+ totalBox.innerHTML="<b>訂單總金額：$"+orderTotal().toLocaleString()+"</b><br>商品：香水｜溫層：常溫";
  show("cart")
 }
 function goCheckout(){if(!Object.keys(cart).length)return alert("購物車沒有商品");show("checkout")}
@@ -150,7 +150,7 @@ function storeChanged(){
 function submitOrder(){if(sending)return;let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\s/g,""),storeType=document.getElementById("storeType").value,storeName=document.getElementById("storeName").value.trim(),m=document.getElementById("msg");
 if(!name)return alert("請填寫姓名");if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");if(!storeType)return alert("請選擇取貨超商");
 if(!/^\d{6}$/.test(storeName))return alert("請輸入6碼 7-ELEVEN 門市店號");
-let items=[];Object.values(cart).forEach(b=>b.items.forEach(x=>{let p=find(x.key);items.push({category:b.category,subCategory:p.sub||"",packageLabel:b.packageLabel,packagePrice:b.price,productName:p.name,quantity:x.qty})}));let orderId=makeId();let orderMeta={productType:"糖果",temperature:"常溫",totalAmount:orderTotal()};sending=true;let b=document.getElementById("orderBtn");b.disabled=true;m.classList.remove("hidden");m.textContent="訂單送出中，請勿重複按…";
+let items=[];Object.values(cart).forEach(b=>b.items.forEach(x=>{let p=find(x.key);items.push({category:b.category,subCategory:p.sub||"",packageLabel:b.packageLabel,packagePrice:b.price,productName:p.name,quantity:x.qty})}));let orderId=makeId();let orderMeta={productType:"香水",temperature:"常溫",totalAmount:orderTotal()};sending=true;let b=document.getElementById("orderBtn");b.disabled=true;m.classList.remove("hidden");m.textContent="訂單送出中，請勿重複按…";
 try{await postNoCors({orderId,customer:{name,phone,storeType,storeName},items});let d=await waitResult(orderId);if(!d.success){m.textContent="❌ "+(d.message||"訂單失敗");await load();return}
 document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)}</b><br>姓名：${esc(d.customer.name)}<br>手機：${esc(d.customer.phone)}<br>取貨超商：${esc(d.customer.storeType)}<br>取貨門市：${esc(d.customer.storeName)}<br><br>商品：<br>`+(()=>{
  let gs={};

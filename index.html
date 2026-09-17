@@ -1,6 +1,6 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>商城 V5.7</title>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>商城 V5.8</title>
 <style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f4fb;color:#222}header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #eee;padding:16px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:22px;font-weight:900}.badge{font-size:12px;background:#eee;padding:4px 8px;border-radius:12px}.purple{border:0;background:#6842c2;color:#fff;font-weight:800;border-radius:14px;padding:12px 15px}.wrap{max-width:760px;margin:auto;padding:14px}.hero{background:linear-gradient(135deg,#6842c2,#9879e4);color:#fff;border-radius:22px;padding:22px;margin-bottom:14px}.tabs{display:flex;gap:8px;overflow:auto;padding:2px 0 12px}.tab{white-space:nowrap;border:1px solid #ddd;background:#fff;padding:10px 13px;border-radius:18px;font-weight:700}.tab.on{background:#222;color:#fff}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card,.panel{background:#fff;border-radius:18px;padding:16px}.name{font-size:18px;font-weight:800}.stock,.muted{font-size:13px;color:#777}.stock{margin:6px 0 13px}.add{width:100%;border:0;border-radius:12px;background:#6842c2;color:#fff;font-weight:800;padding:11px}.add:disabled{background:#ccc}.hidden{display:none}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #eee}.qty{display:flex;align-items:center;gap:7px}.qty button{border:0;border-radius:9px;padding:8px 12px;font-size:18px}.qty input{width:64px;margin:0;padding:8px 5px;text-align:center;border:1px solid #ddd;border-radius:9px;font-size:17px}.catTitle{font-size:17px;font-weight:900;padding:16px 0 5px;border-bottom:2px solid #eee}.backBtn{border:0;background:transparent;font-size:18px;font-weight:800;padding:4px 0 14px}.wide{width:100%;margin-top:10px}input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:12px;font-size:16px;margin:6px 0 12px;background:#fff}label{font-weight:800}.result{padding:13px;border-radius:12px;background:#f2f2f2;margin-top:12px}.summary{line-height:1.8}@media(max-width:520px){.grid{grid-template-columns:1fr}}</style></head>
-<body><header><div class="brand">商城 <span class="badge">V5.7</span></div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
+<body><header><div class="brand">商城 <span class="badge">V5.8</span></div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
 <main class="wrap">
 <section id="shop"><div class="hero"><h1>商品選購</h1><div>即時庫存</div><div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
 <section id="cart" class="hidden"><div class="panel"><button class="backBtn" onclick="show('shop')">← 返回購物</button><h2>購物車</h2><div id="rows"></div><p><b>共 <span id="tq">0</span> 件</b></p><button class="purple wide" onclick="goCheckout()">前往填寫取貨資料</button><button class="wide" onclick="show('shop')">繼續購物</button></div></section>
@@ -117,6 +117,9 @@ function makeId(){return "ORD-"+Date.now()+"-"+Math.random().toString(36).slice(
 function postNoCors(payload){return fetch(API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)})}
 function checkStatus(orderId){return new Promise((resolve,reject)=>{let cb="cb_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),s=document.createElement("script"),timer;window[cb]=d=>{cleanup();resolve(d)};function cleanup(){clearTimeout(timer);delete window[cb];s.remove()}s.onerror=()=>{cleanup();reject(Error("查詢失敗"))};timer=setTimeout(()=>{cleanup();reject(Error("查詢逾時"))},8000);s.src=API+"?orderId="+encodeURIComponent(orderId)+"&callback="+cb+"&_="+Date.now();document.body.appendChild(s)})}
 async function waitResult(id){for(let i=0;i<12;i++){try{let d=await checkStatus(id);if(d.status==="completed"||d.status==="failed")return d}catch(e){}await new Promise(r=>setTimeout(r,1000))}throw Error("訂單已送出，但暫時無法確認結果。請勿重複送出")}
+const STORE_TEST_MAP={
+ "158602":{name:"英海門市",address:"新北市板橋區雨農路50號"}
+};
 function storeChanged(){
  let v=document.getElementById("storeName").value.replace(/\D/g,"").slice(0,6);
  document.getElementById("storeName").value=v;
@@ -125,8 +128,14 @@ function storeChanged(){
  if(!v){box.classList.add("hidden");return}
  box.classList.remove("hidden");
  if(v.length<6){box.innerHTML="請輸入完整6碼門市店號";return}
- box.innerHTML="✓ 店號格式正確：<b>"+esc(v)+"</b><br><span class='muted'>請使用上方 7-ELEVEN 官方門市查詢確認店名與地址。</span>";
- ck.disabled=false;
+ let s=STORE_TEST_MAP[v];
+ if(s){
+   box.innerHTML="✓ <b>"+esc(s.name)+"</b><br>店號："+esc(v)+"<br><span class='muted'>"+esc(s.address)+"</span><br><b>請確認是否為您要取貨的門市</b>";
+   ck.disabled=false;
+ }else{
+   box.innerHTML="✓ 店號格式正確：<b>"+esc(v)+"</b><br><span class='muted'>此店號尚未加入本地門市資料，請先使用上方 7-ELEVEN 官方查詢確認。</span>";
+   ck.disabled=false;
+ }
 }
 async function submitOrder(){if(sending)return;let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\s/g,""),storeType=document.getElementById("storeType").value,storeName=document.getElementById("storeName").value.trim(),m=document.getElementById("msg");
 if(!name)return alert("請填寫姓名");if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");if(!storeType)return alert("請選擇取貨超商");
@@ -134,7 +143,17 @@ if(!/^\d{6}$/.test(storeName))return alert("請輸入6碼 7-ELEVEN 門市店號"
 if(!document.getElementById("storeConfirm").checked)return alert("請先確認取貨門市");
 let items=[];Object.values(cart).forEach(b=>b.items.forEach(x=>{let p=find(x.key);items.push({category:b.category,subCategory:p.sub||"",packageLabel:b.packageLabel,packagePrice:b.price,productName:p.name,quantity:x.qty})}));let orderId=makeId();sending=true;let b=document.getElementById("orderBtn");b.disabled=true;m.classList.remove("hidden");m.textContent="訂單送出中，請勿重複按…";
 try{await postNoCors({orderId,customer:{name,phone,storeType,storeName},items});let d=await waitResult(orderId);if(!d.success){m.textContent="❌ "+(d.message||"訂單失敗");await load();return}
-document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)}</b><br>姓名：${esc(d.customer.name)}<br>手機：${esc(d.customer.phone)}<br>取貨超商：${esc(d.customer.storeType)}<br>取貨門市：${esc(d.customer.storeName)}<br><br>商品：<br>`+(()=>{let gs={};d.items.forEach(x=>{(gs[x.category]||(gs[x.category]=[])).push(x)});return Object.entries(gs).map(([g,a])=>`<b>${esc(g)}</b><br>`+a.map(x=>`${esc(x.productName)} × ${x.quantity}`).join("<br>")).join("<br><br>")})();
+document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)}</b><br>姓名：${esc(d.customer.name)}<br>手機：${esc(d.customer.phone)}<br>取貨超商：${esc(d.customer.storeType)}<br>取貨門市：${esc(d.customer.storeName)}<br><br>商品：<br>`+(()=>{
+ let gs={};
+ (d.items||[]).forEach(x=>{
+   let cat=x.category||"未分類";
+   let pack=x.packageLabel||"";
+   let key=cat+"||"+pack;
+   if(!gs[key])gs[key]={cat,pack,items:[]};
+   gs[key].items.push(x);
+ });
+ return Object.values(gs).map(g=>`<b>${esc(g.cat)}</b>${g.pack?`｜${esc(g.pack)}`:""}<br>`+g.items.map(x=>`${esc(x.productName)} × ${x.quantity}`).join("<br>")).join("<br><br>");
+})();
 cart={};count();await load();show("done")}catch(e){m.textContent="⚠️ "+e.message+"（訂單編號："+orderId+"）"}finally{sending=false;b.disabled=false}}
 function finish(){document.getElementById("name").value="";document.getElementById("phone").value="";document.getElementById("storeType").value="";document.getElementById("storeName").value="";
 document.getElementById("storeConfirm").checked=false;

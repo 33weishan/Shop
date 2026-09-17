@@ -13,8 +13,8 @@
 <input id="storeName" inputmode="numeric" maxlength="6" placeholder="請輸入6碼門市店號" oninput="storeChanged()">
 <a class="purple wide" style="display:block;text-align:center;text-decoration:none" href="https://emap.pcsc.com.tw/emap.aspx" target="_blank" rel="noopener">不知道店號？查詢 7-ELEVEN 門市</a>
 <div id="storeVerify" class="result hidden"></div>
-<label style="display:block;margin-top:12px"><input id="storeConfirm" type="checkbox" style="width:auto;margin-right:7px" disabled>我已確認這是我要取貨的門市</label>
-<p class="muted">目前先驗證6碼格式；門市名稱與地址資料來源會獨立接入，不會假裝成即時官方驗證。</p>
+
+
 <div id="msg" class="result hidden"></div>
 <button id="orderBtn" class="purple wide" onclick="submitOrder()">確認送出訂單</button>
 <button class="wide" onclick="showCart()">返回購物車</button>
@@ -135,27 +135,19 @@ function makeId(){return "ORD-"+Date.now()+"-"+Math.random().toString(36).slice(
 function postNoCors(payload){return fetch(API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)})}
 function checkStatus(orderId){return new Promise((resolve,reject)=>{let cb="cb_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),s=document.createElement("script"),timer;window[cb]=d=>{cleanup();resolve(d)};function cleanup(){clearTimeout(timer);delete window[cb];s.remove()}s.onerror=()=>{cleanup();reject(Error("查詢失敗"))};timer=setTimeout(()=>{cleanup();reject(Error("查詢逾時"))},8000);s.src=API+"?orderId="+encodeURIComponent(orderId)+"&callback="+cb+"&_="+Date.now();document.body.appendChild(s)})}
 async function waitResult(id){for(let i=0;i<12;i++){try{let d=await checkStatus(id);if(d.status==="completed"||d.status==="failed")return d}catch(e){}await new Promise(r=>setTimeout(r,1000))}throw Error("訂單已送出，但暫時無法確認結果。請勿重複送出")}
-const STORE_TEST_MAP={
- "158602":{name:"英海門市",address:"新北市板橋區雨農路50號"}
-};
 function storeChanged(){
  let v=document.getElementById("storeName").value.replace(/\D/g,"").slice(0,6);
  document.getElementById("storeName").value=v;
- let box=document.getElementById("storeVerify"),ck=document.getElementById("storeConfirm");
- ck.checked=false; ck.disabled=true;
+ let box=document.getElementById("storeVerify");
  if(!v){box.classList.add("hidden");return}
  box.classList.remove("hidden");
- if(v.length<6){box.innerHTML="請輸入完整6碼門市店號";return}
- let s=STORE_TEST_MAP[v];
- if(s){
-   box.innerHTML="✓ <b>"+esc(s.name)+"</b><br>店號："+esc(v)+"<br><span class='muted'>"+esc(s.address)+"</span><br><b>請確認是否為您要取貨的門市</b>";
-   ck.disabled=false;
- }else{
-   box.innerHTML="✓ 店號格式正確：<b>"+esc(v)+"</b><br><span class='muted'>此店號尚未加入本地門市資料，請先使用上方 7-ELEVEN 官方查詢確認。</span>";
-   ck.disabled=false;
+ if(v.length<6){
+   box.innerHTML="請輸入完整6碼門市店號";
+   return;
  }
+ box.innerHTML="✓ 店號格式正確：<b>"+esc(v)+"</b>";
 }
-async function submitOrder(){if(sending)return;let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\s/g,""),storeType=document.getElementById("storeType").value,storeName=document.getElementById("storeName").value.trim(),m=document.getElementById("msg");
+function submitOrder(){if(sending)return;let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\s/g,""),storeType=document.getElementById("storeType").value,storeName=document.getElementById("storeName").value.trim(),m=document.getElementById("msg");
 if(!name)return alert("請填寫姓名");if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");if(!storeType)return alert("請選擇取貨超商");
 if(!/^\d{6}$/.test(storeName))return alert("請輸入6碼 7-ELEVEN 門市店號");
 if(!document.getElementById("storeConfirm").checked)return alert("請先確認取貨門市");

@@ -150,7 +150,6 @@ function storeChanged(){
 function submitOrder(){if(sending)return;let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\s/g,""),storeType=document.getElementById("storeType").value,storeName=document.getElementById("storeName").value.trim(),m=document.getElementById("msg");
 if(!name)return alert("請填寫姓名");if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");if(!storeType)return alert("請選擇取貨超商");
 if(!/^\d{6}$/.test(storeName))return alert("請輸入6碼 7-ELEVEN 門市店號");
-if(!document.getElementById("storeConfirm").checked)return alert("請先確認取貨門市");
 let items=[];Object.values(cart).forEach(b=>b.items.forEach(x=>{let p=find(x.key);items.push({category:b.category,subCategory:p.sub||"",packageLabel:b.packageLabel,packagePrice:b.price,productName:p.name,quantity:x.qty})}));let orderId=makeId();let orderMeta={productType:"糖果",temperature:"常溫",totalAmount:orderTotal()};sending=true;let b=document.getElementById("orderBtn");b.disabled=true;m.classList.remove("hidden");m.textContent="訂單送出中，請勿重複按…";
 try{await postNoCors({orderId,customer:{name,phone,storeType,storeName},items});let d=await waitResult(orderId);if(!d.success){m.textContent="❌ "+(d.message||"訂單失敗");await load();return}
 document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)}</b><br>姓名：${esc(d.customer.name)}<br>手機：${esc(d.customer.phone)}<br>取貨超商：${esc(d.customer.storeType)}<br>取貨門市：${esc(d.customer.storeName)}<br><br>商品：<br>`+(()=>{
@@ -166,8 +165,6 @@ document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)
 })();
 cart={};count();await load();show("done")}catch(e){m.textContent="⚠️ "+e.message+"（訂單編號："+orderId+"）"}finally{sending=false;b.disabled=false}}
 function finish(){document.getElementById("name").value="";document.getElementById("phone").value="";document.getElementById("storeType").value="";document.getElementById("storeName").value="";
-document.getElementById("storeConfirm").checked=false;
-document.getElementById("storeConfirm").disabled=true;
 document.getElementById("storeVerify").classList.add("hidden");
 document.getElementById("msg").classList.add("hidden");show("shop")}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}

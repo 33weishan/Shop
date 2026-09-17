@@ -92,7 +92,7 @@ function render(){
    box.style.display="block";
    box.innerHTML=["五代主機","六代主機"].map(sub=>{
      let price=sub==="五棒棒糖"?800:1200,items=g.items.filter(p=>p.sub===sub);
-     return `<div class="panel" style="margin-bottom:14px"><h2>${sub}｜$${price}／包</h2><div class="grid">`+
+     return `<div class="panel" style="margin-bottom:14px"><h2>${sub}｜$${price}／隻</h2><div class="grid">`+
        items.map(p=>productPicker(p,cat,true)).join("")+`</div></div>`;
    }).join("");
    return;

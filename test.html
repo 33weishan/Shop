@@ -387,7 +387,61 @@ textarea:focus{
 </style></head>
 <body><header><div class="brand">RELX & ILIA</div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
 <main class="wrap">
-<section id="shop"><div class="hero"><h1>🤍香氛精油💙</h1><div>加購$150指定主機顏色</div><div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
+<section id="shop">
+
+  <!-- 精品首頁主視覺 -->
+  <div class="hero-luxury">
+
+    <div class="hero-copy">
+      <div class="small">ILIA & MORE</div>
+
+      <h1>SCENT<br>COLLECTION</h1>
+
+      <p class="cn">香氛精油</p>
+
+      <p class="small">DISCOVER YOUR SCENT</p>
+
+      <button class="luxury-btn"
+        onclick="document.getElementById('collectionSection').scrollIntoView({behavior:'smooth'})">
+        EXPLORE COLLECTION
+      </button>
+
+      <div id="sync" class="muted" style="margin-top:22px">
+        同步中…
+      </div>
+    </div>
+
+    <div class="hero-photo">
+      <img src="images/hero.jpg" alt="ILIA & MORE">
+    </div>
+
+  </div>
+
+
+  <!-- 五大分類 -->
+  <div class="collection-section" id="collectionSection">
+
+    <div class="collection-heading">
+      <h2>OUR COLLECTION</h2>
+      <p>選擇你喜歡的系列</p>
+    </div>
+
+    <div class="collection-grid" id="collectionCards"></div>
+
+  </div>
+
+
+  <!-- 原本商品功能 -->
+  <div style="max-width:1180px;margin:0 auto;padding:40px 24px 90px">
+
+    <div class="tabs" id="tabs"></div>
+
+    <div class="grid" id="products"></div>
+
+  </div>
+
+</section>
+   
 <section id="cart" class="hidden"><div class="panel"><button class="backBtn" onclick="show('shop')">← 返回購物</button><h2>購物車</h2><div id="rows"></div><p><b>共 <span id="tq">0</span> 件</b></p><button class="purple wide" onclick="goCheckout()">前往填寫取貨資料</button><button class="wide" onclick="show('shop')">繼續購物</button></div></section>
 <section id="checkout" class="hidden"><div class="panel">
 <button type="button" class="secondary" onclick="show('cart')">← 返回購物車</button>

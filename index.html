@@ -4,7 +4,9 @@
 <main class="wrap">
 <section id="shop"><div class="hero"><h1>🤍香氛精油💙</h1><div>加購$150指定主機顏色</div><div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
 <section id="cart" class="hidden"><div class="panel"><button class="backBtn" onclick="show('shop')">← 返回購物</button><h2>購物車</h2><div id="rows"></div><p><b>共 <span id="tq">0</span> 件</b></p><button class="purple wide" onclick="goCheckout()">前往填寫取貨資料</button><button class="wide" onclick="show('shop')">繼續購物</button></div></section>
-<section id="checkout" class="hidden"><div class="panel"><h2>取貨資料</h2>
+<section id="checkout" class="hidden"><div class="panel">
+<button type="button" class="secondary" onclick="show('cart')">← 返回購物車</button>
+<h2>取貨資料</h2>
 <label>姓名</label><input id="name" autocomplete="name" placeholder="請輸入姓名">
 <label>手機號碼</label><input id="phone" inputmode="tel" maxlength="10" placeholder="09xxxxxxxx">
 <label>取貨超商</label>
@@ -31,6 +33,12 @@ const SPECS=[
  {label:"悅刻12000口拋棄式",nameCol:12,stockCol:13,start:5,end:24}
 ];
 let groups=[],active=0,cart={},sending=false;
+
+try{
+  cart=JSON.parse(localStorage.getItem("shop_cart")||"{}");
+}catch(e){
+  cart={};
+}
 
 const PACKAGES={
  "悅刻🥚":[
@@ -161,7 +169,15 @@ function addC5(k){let q=draft[k]||0,p=find(k);if(q<=0)return alert("請先選擇
 function find(k){for(let g of groups){let p=g.items.find(x=>x.key===k);if(p)return p}}
 function add(k){let p=find(k),q=cart[k]||0;if(q<p.stock)cart[k]=q+1;count()}
 function orderTotal(){return Object.values(cart).reduce((s,b)=>s+(b.category==="主機"?Number(b.price||0)*Number(b.target||0):Number(b.price||0)),0)}
-function count(){document.getElementById("cc").textContent=Object.values(cart).reduce((s,b)=>s+(b.bundle?b.items.reduce((a,x)=>a+x.qty,0):b),0)}
+function count(){
+  document.getElementById("cc").textContent=
+    Object.values(cart).reduce(
+      (s,b)=>s+(b.bundle?b.items.reduce((a,x)=>a+x.qty,0):b),
+      0
+    );
+
+  localStorage.setItem("shop_cart",JSON.stringify(cart));
+}
 function show(id){["shop","cart","checkout","done"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));scrollTo(0,0)}
 function showCart(){
  let entries=Object.entries(cart),el=document.getElementById("rows");
@@ -209,7 +225,7 @@ document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)
  });
  return Object.values(gs).map(g=>`<b>${esc(g.cat)}</b>${g.pack?`｜${esc(g.pack)}`:""}<br>`+g.items.map(x=>`${esc(x.productName)} × ${x.quantity}`).join("<br>")).join("<br><br>");
 })();
-cart={};count();await load();show("done")}catch(e){m.textContent="⚠️ "+e.message+"（訂單編號："+orderId+"）"}finally{sending=false;b.disabled=false}}
+cart={};localStorage.removeItem("shop_cart");count();await load();show("done")}catch(e){m.textContent="⚠️ "+e.message+"（訂單編號："+orderId+"）"}finally{sending=false;b.disabled=false}}
 function finish(){document.getElementById("name").value="";document.getElementById("phone").value="";document.getElementById("storeType").value="7-ELEVEN";document.getElementById("storeName").value="";
 document.getElementById("storeVerify").classList.add("hidden");
 document.getElementById("msg").classList.add("hidden");show("shop")}

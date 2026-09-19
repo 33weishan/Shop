@@ -572,7 +572,27 @@ function moveShopSlider(direction){
     dot.classList.toggle("active",i===shopSlideIndex);
   });
 }
-   
+
+function openImage(src){
+  const lightbox = document.getElementById("imageLightbox");
+  const photo = document.getElementById("imageLightboxPhoto");
+
+  photo.src = src;
+  lightbox.classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+
+function closeImage(){
+  const lightbox = document.getElementById("imageLightbox");
+  lightbox.classList.remove("show");
+  document.body.style.overflow = "";
+}   
+
 load();
    
-</script></body></html>
+</script>
+<div id="imageLightbox" class="image-lightbox" onclick="closeImage()">
+  <button type="button" class="image-lightbox-close" onclick="closeImage()">×</button>
+  <img id="imageLightboxPhoto" src="" alt="圖片預覽" onclick="event.stopPropagation()">
+</div>
+</body></html>

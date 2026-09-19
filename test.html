@@ -538,4 +538,49 @@ document.getElementById("msg").classList.add("hidden");show("shop")}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 load();
 count();
+let shopSlideIndex = 0;
+let shopSlideTimer = null;
+
+function initShopSlider(){
+  clearInterval(shopSlideTimer);
+
+  const track = document.querySelector(".slider-track");
+  const slides = document.querySelectorAll(".slider-track img");
+
+  if(!track || !slides.length) return;
+
+  shopSlideIndex = 0;
+
+  shopSlideTimer = setInterval(()=>{
+    moveShopSlider(1);
+  },4000);
+}
+
+function moveShopSlider(direction){
+  const track = document.querySelector(".slider-track");
+  const slides = document.querySelectorAll(".slider-track img");
+  const dots = document.querySelectorAll(".slider-dot");
+
+  if(!track || !slides.length) return;
+
+  shopSlideIndex += direction;
+
+  if(shopSlideIndex >= slides.length){
+    shopSlideIndex = 0;
+  }
+
+  if(shopSlideIndex < 0){
+    shopSlideIndex = slides.length - 1;
+  }
+
+  track.scrollTo({
+    left: track.clientWidth * shopSlideIndex,
+    behavior:"smooth"
+  });
+
+  dots.forEach((dot,i)=>{
+    dot.classList.toggle("active",i===shopSlideIndex);
+  });
+}
+   
 </script></body></html>

@@ -297,8 +297,6 @@ function renderTabs(){document.getElementById("tabs").innerHTML=groups.map((g,i)
 function ensureCandyTitle(){
   return;
 }  
- if(tabs.parentNode) tabs.parentNode.insertBefore(t,tabs);
-}
 function render(){
   let g=groups[active],
       cat=SPECS[active].label,

@@ -122,6 +122,93 @@ button.secondary{
   padding:14px 0 !important;
   border-radius:0 !important;
 }      
+/* ===== 商品圖片跑馬燈 ===== */
+
+.shop-slider{
+  position:relative;
+  width:100%;
+  margin:14px 0;
+  overflow:hidden;
+  border-radius:24px;
+  background:#eeeae5;
+}
+
+.slider-track{
+  display:flex;
+  width:100%;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  scrollbar-width:none;
+}
+
+.slider-track::-webkit-scrollbar{
+  display:none;
+}
+
+.slider-track img{
+  flex:0 0 100%;
+  width:100%;
+  aspect-ratio:16 / 9;
+  object-fit:cover;
+  scroll-snap-align:start;
+  display:block;
+}
+
+/* 左右箭頭 */
+.slider-arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:42px !important;
+  height:42px;
+  padding:0 !important;
+  border:none !important;
+  border-radius:50% !important;
+  background:rgba(255,255,255,.85) !important;
+  color:#171717 !important;
+  font-size:30px !important;
+  line-height:42px;
+  z-index:2;
+}
+
+.slider-prev{
+  left:12px;
+}
+
+.slider-next{
+  right:12px;
+}
+
+/* 下方圓點 */
+.slider-dots{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:12px;
+  display:flex;
+  justify-content:center;
+  gap:7px;
+}
+
+.slider-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:rgba(255,255,255,.55);
+}
+
+.slider-dot.active{
+  background:#fff;
+}
+
+/* 選擇套組內的小提示 */
+.package-help{
+  margin-top:12px;
+  color:#777;
+  font-size:14px;
+  line-height:1.5;
+}      
 </style>
 <body><header><div class="brand">RELX & ILIA</div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
 <main class="wrap">
@@ -208,6 +295,8 @@ async function load(){try{
 }catch(e){document.getElementById("sync").textContent="庫存同步失敗"}}
 function renderTabs(){document.getElementById("tabs").innerHTML=groups.map((g,i)=>`<button class="tab ${i===active?"on":""}" onclick="active=${i};renderTabs();render()">${g.name}</button>`).join("")}
 function ensureCandyTitle(){
+  return;
+}
  let tabs=document.getElementById("tabs");
  if(!tabs)return;
  let t=document.getElementById("candyTitle");
@@ -221,20 +310,114 @@ function ensureCandyTitle(){
  if(tabs.parentNode) tabs.parentNode.insertBefore(t,tabs);
 }
 function render(){
- let g=groups[active],cat=SPECS[active].label,box=document.getElementById("products");
- if(cat==="主機"){
-   box.style.display="block";
-   box.innerHTML=["五代主機","六代主機"].map(sub=>{
-     let price=sub==="五代主機"?800:1200,items=g.items.filter(p=>p.sub===sub);
-     return `<div class="panel" style="margin-bottom:14px"><h2>${sub}｜$${price}／隻</h2><div class="grid">`+
-       items.map(p=>productPicker(p,cat,true)).join("")+`</div></div>`;
-   }).join("");
-   return;
- }
- box.style.display="block";
- let packs=PACKAGES[cat]||[],cp=chosenPackage[cat];
- box.innerHTML=`<div class="panel" style="margin-bottom:14px"><h2>選擇套組</h2><select onchange="choosePack('${cat}',this.value)"><option value="">請先選擇套組</option>${packs.map(p=>`<option value="${p.id}" ${cp&&cp.id===p.id?"selected":""}>${p.label}－$${p.price}</option>`).join("")}</select>${cp?`<div class="result"><b>${cp.label}｜$${cp.price}</b><br>已選 <b>${draftTotal(cat)} / ${cp.target}</b> 顆</div>`:""}</div>`+
-   (cp?`<div class="grid">${g.items.map(p=>productPicker(p,cat,false)).join("")}</div><div class="panel" style="margin-top:14px"><button class="purple wide" onclick="addPackage('${cat}')">加入此套組到購物車</button></div>`:`<div class="panel">請先選擇上方套組，再挑選口味。</div>`);
+  let g=groups[active],
+      cat=SPECS[active].label,
+      box=document.getElementById("products");
+
+  if(cat==="主機"){
+    box.style.display="block";
+
+    box.innerHTML=["五代主機","六代主機"].map(sub=>{
+      let price=sub==="五代主機"?800:1200,
+          items=g.items.filter(p=>p.sub===sub);
+
+      return `<div class="panel" style="margin-bottom:14px">
+        <h2>${sub}｜$${price}／隻</h2>
+        <div class="grid">
+          ${items.map(p=>productPicker(p,cat,true)).join("")}
+        </div>
+      </div>`;
+    }).join("");
+
+    return;
+  }
+
+  box.style.display="block";
+
+  let packs=PACKAGES[cat]||[],
+      cp=chosenPackage[cat];
+
+  box.innerHTML=`
+
+    <div class="panel package-panel">
+
+      <h2>選擇套組</h2>
+
+      <select onchange="choosePack('${cat}',this.value)">
+        <option value="">請先選擇套組</option>
+
+        ${packs.map(p=>`
+          <option
+            value="${p.id}"
+            ${cp&&cp.id===p.id?"selected":""}>
+            ${p.label}－$${p.price}
+          </option>
+        `).join("")}
+
+      </select>
+
+      ${
+        cp
+        ? `<div class="result">
+             <b>${cp.label}｜$${cp.price}</b><br>
+             已選 <b>${draftTotal(cat)} / ${cp.target}</b> 顆
+           </div>`
+        : `<div class="package-help">
+             請先選擇上方套組，再挑選口味。
+           </div>`
+      }
+
+    </div>
+
+
+    <!-- 圖片跑馬燈 -->
+    <div class="shop-slider">
+
+      <div class="slider-track">
+
+        <img src="images/slide1.jpg" alt="">
+        <img src="images/slide2.jpg" alt="">
+        <img src="images/slide3.jpg" alt="">
+
+      </div>
+
+      <button type="button"
+              class="slider-arrow slider-prev"
+              onclick="moveShopSlider(-1)">‹</button>
+
+      <button type="button"
+              class="slider-arrow slider-next"
+              onclick="moveShopSlider(1)">›</button>
+
+      <div class="slider-dots">
+        <span class="slider-dot active"></span>
+        <span class="slider-dot"></span>
+        <span class="slider-dot"></span>
+      </div>
+
+    </div>
+
+
+    ${
+      cp
+      ? `
+        <div class="grid">
+          ${g.items.map(p=>productPicker(p,cat,false)).join("")}
+        </div>
+
+        <div class="panel" style="margin-top:14px">
+          <button class="purple wide"
+                  onclick="addPackage('${cat}')">
+            加入此套組到購物車
+          </button>
+        </div>
+      `
+      : ""
+    }
+
+  `;
+
+  initShopSlider();
 }
 function productPicker(p,cat,isC5){
  let q=draft[p.key]||0;

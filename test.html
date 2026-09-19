@@ -296,17 +296,7 @@ async function load(){try{
 function renderTabs(){document.getElementById("tabs").innerHTML=groups.map((g,i)=>`<button class="tab ${i===active?"on":""}" onclick="active=${i};renderTabs();render()">${g.name}</button>`).join("")}
 function ensureCandyTitle(){
   return;
-}
- let tabs=document.getElementById("tabs");
- if(!tabs)return;
- let t=document.getElementById("candyTitle");
- if(!t){
-   t=document.createElement("div");
-   t.id="candyTitle";
-   t.className="panel";
-   t.style.cssText="margin-bottom:14px;text-align:center";
-   t.innerHTML='<h1 style="margin:0">香水</h1>';
- }
+}  
  if(tabs.parentNode) tabs.parentNode.insertBefore(t,tabs);
 }
 function render(){

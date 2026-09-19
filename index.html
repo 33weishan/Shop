@@ -275,19 +275,20 @@ button.secondary{
 <section id="checkout" class="hidden"><div class="panel">
 <button type="button" class="secondary" onclick="show('cart')">← 返回購物車</button>
 <h2>取貨資料</h2>
-<label>姓名</label><input id="name" autocomplete="name" placeholder="請輸入姓名">
-<label>手機號碼</label><input id="phone" inputmode="tel" maxlength="10" placeholder="09xxxxxxxx">
+<label>姓名（必填）</label><input id="name" autocomplete="name" placeholder="請輸入姓名">
+<label>手機號碼（必填）</label><input id="phone" inputmode="tel" maxlength="10" placeholder="09xxxxxxxx">
+<label>IG / LINE 聯絡帳號（必填）</label>
+<input id="contactAccount" placeholder="請輸入LINE ID / IG帳號">
 <label>取貨超商</label>
 <input id="storeType" value="7-ELEVEN" readonly>
-<label>7-ELEVEN 門市店號</label>
+<label>7-ELEVEN 門市店號（必填）</label>
 <input id="storeName" inputmode="numeric" maxlength="6" placeholder="請輸入6碼門市店號" oninput="storeChanged()">
 <a class="purple wide" style="display:block;text-align:center;text-decoration:none" href="https://emap.pcsc.com.tw/emap.aspx" target="_blank" rel="noopener">不知道店號？查詢 7-ELEVEN 門市</a>
 <div id="storeVerify" class="result hidden"></div>
 <label>IG / LINE 聯絡帳號（必填）</label>
 <input id="contactAccount" placeholder="請輸入LINE ID / IG帳號">
-
 <label>賣場問題反饋與意見（選填）</label>
-<textarea id="feedback" placeholder="如有任何問題或建議，歡迎留言"></textarea>
+<input id="feedback" placeholder="如有任何問題或建議，歡迎留言">
 
 <div id="msg" class="result hidden"></div>
 <button id="orderBtn" class="purple wide" onclick="submitOrder()">確認送出訂單</button>

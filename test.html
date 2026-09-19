@@ -1,472 +1,49 @@
 <!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>商城</title>
-<style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f4fb;color:#222}header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #eee;padding:16px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:22px;font-weight:900}.badge{font-size:12px;background:#eee;padding:4px 8px;border-radius:12px}.purple{border:0;background:#6842c2;color:#fff;font-weight:800;border-radius:14px;padding:12px 15px}.wrap{max-width:760px;margin:auto;padding:14px}.hero{background:linear-gradient(135deg,#6842c2,#9879e4);color:#fff;border-radius:22px;padding:22px;margin-bottom:14px}.tabs{display:flex;gap:8px;overflow:auto;padding:2px 0 12px}.tab{white-space:nowrap;border:1px solid #ddd;background:#fff;padding:10px 13px;border-radius:18px;font-weight:700}.tab.on{background:#222;color:#fff}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card,.panel{background:#fff;border-radius:18px;padding:16px}.name{font-size:18px;font-weight:800}.stock,.muted{font-size:13px;color:#777}.stock{margin:6px 0 13px}.add{width:100%;border:0;border-radius:12px;background:#6842c2;color:#fff;font-weight:800;padding:11px}.add:disabled{background:#ccc}.hidden{display:none}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #eee}.qty{display:flex;align-items:center;gap:7px}.qty button{border:0;border-radius:9px;padding:8px 12px;font-size:18px}.qty input{width:64px;margin:0;padding:8px 5px;text-align:center;border:1px solid #ddd;border-radius:9px;font-size:17px}.catTitle{font-size:17px;font-weight:900;padding:16px 0 5px;border-bottom:2px solid #eee}.backBtn{border:0;background:transparent;font-size:18px;font-weight:800;padding:4px 0 14px}.wide{width:100%;margin-top:10px}input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:12px;font-size:16px;margin:6px 0 12px;background:#fff}label{font-weight:800}.result{padding:13px;border-radius:12px;background:#f2f2f2;margin-top:12px}.summary{line-height:1.8}@media(max-width:520px){.grid{grid-template-columns:1fr}}
-/* ==================================================
-   ILIA & MORE — Minimal Editorial Shop
-   極簡精品商城風格
-================================================== */
-
-:root{
-  --bg:#f5f2ef;
-  --paper:#ffffff;
-  --ink:#171717;
-  --muted:#77736f;
-  --line:#e7e2dd;
-  --soft:#eee9e5;
-  --radius:4px;
+<style>*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f4fb;color:#222}header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #eee;padding:16px;display:flex;justify-content:space-between;align-items:center}.brand{font-size:22px;font-weight:900}.badge{font-size:12px;background:#eee;padding:4px 8px;border-radius:12px}.purple{border:0;background:#6842c2;color:#fff;font-weight:800;border-radius:14px;padding:12px 15px}.wrap{max-width:760px;margin:auto;padding:14px}.hero{background:linear-gradient(135deg,#6842c2,#9879e4);color:#fff;border-radius:22px;padding:22px;margin-bottom:14px}.tabs{display:flex;gap:8px;overflow:auto;padding:2px 0 12px}.tab{white-space:nowrap;border:1px solid #ddd;background:#fff;padding:10px 13px;border-radius:18px;font-weight:700}.tab.on{background:#222;color:#fff}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card,.panel{background:#fff;border-radius:18px;padding:16px}.name{font-size:18px;font-weight:800}.stock,.muted{font-size:13px;color:#777}.stock{margin:6px 0 13px}.add{width:100%;border:0;border-radius:12px;background:#6842c2;color:#fff;font-weight:800;padding:11px}.add:disabled{background:#ccc}.hidden{display:none}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #eee}.qty{display:flex;align-items:center;gap:7px}.qty button{border:0;border-radius:9px;padding:8px 12px;font-size:18px}.qty input{width:64px;margin:0;padding:8px 5px;text-align:center;border:1px solid #ddd;border-radius:9px;font-size:17px}.catTitle{font-size:17px;font-weight:900;padding:16px 0 5px;border-bottom:2px solid #eee}.backBtn{border:0;background:transparent;font-size:18px;font-weight:800;padding:4px 0 14px}.wide{width:100%;margin-top:10px}input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:12px;font-size:16px;margin:6px 0 12px;background:#fff}label{font-weight:800}.result{padding:13px;border-radius:12px;background:#f2f2f2;margin-top:12px}.summary{line-height:1.8}@media(max-width:520px){.grid{grid-template-columns:1fr}}</style></head>
+   <style>
+html,body{
+  background:#f3f0eb !important;
+  color:#171717 !important;
 }
 
-/* ---------- 全站 ---------- */
-
-body{
-  background:var(--bg) !important;
-  color:var(--ink) !important;
-  font-family:-apple-system,BlinkMacSystemFont,
-    "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif !important;
+.purple,
+.secondary,
+.backBtn{
+  background:#171717 !important;
+  color:#fff !important;
+  border-color:#171717 !important;
 }
 
-/* 英文精品字 */
-
-.luxury-title,
-.brand-name,
-.collection-title{
-  font-family:Georgia,"Times New Roman",serif !important;
-  font-weight:400 !important;
-  letter-spacing:.04em;
+.hero{
+  background:#171717 !important;
+  color:#fff !important;
 }
 
-/* ---------- 頂部 ---------- */
-
-.luxury-header{
-  height:76px;
-  padding:0 26px;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
-  background:#fff;
-  border-bottom:1px solid var(--line);
+.tab.on{
+  background:#171717 !important;
+  color:#fff !important;
+  border-color:#171717 !important;
 }
 
-.brand-name{
-  font-size:22px;
+a.purple{
+  background:#171717 !important;
+  color:#fff !important;
 }
-
-.header-actions{
-  display:flex;
-  align-items:center;
-  gap:24px;
-
-  font-size:13px;
-}
-
-.header-actions button{
-  background:none;
-  border:0;
-  color:var(--ink);
-  cursor:pointer;
-}
-
-/* ---------- 首頁主視覺 ---------- */
-
-.hero-luxury{
-  max-width:1180px;
-  margin:0 auto;
-  min-height:560px;
-
-  display:grid;
-  grid-template-columns:42% 58%;
-
-  background:#eee9e5;
-}
-
-.hero-copy{
-  padding:80px 30px 60px 55px;
-
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
-
-.hero-copy h1{
-  margin:0 0 18px;
-
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:58px;
-  line-height:.98;
-  font-weight:400;
-  letter-spacing:.02em;
-}
-
-.hero-copy .cn{
-  margin:0 0 12px;
-  font-size:18px;
-  letter-spacing:.12em;
-}
-
-.hero-copy .small{
-  margin-bottom:28px;
-
-  color:var(--muted);
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:12px;
-  letter-spacing:.18em;
-}
-
-.hero-photo{
-  min-height:560px;
-  overflow:hidden;
-}
-
-.hero-photo img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-
-/* ---------- 精品黑色按鈕 ---------- */
-
-.luxury-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-
-  width:max-content;
-
-  padding:14px 25px;
-
-  background:#181818;
-  color:#fff;
-
-  border:1px solid #181818;
-  border-radius:2px;
-
-  font-size:12px;
-  letter-spacing:.08em;
-  text-decoration:none;
-
-  cursor:pointer;
-}
-
-.luxury-btn:hover{
-  background:#333;
-}
-
-/* ---------- COLLECTION ---------- */
-
-.collection-section{
-  max-width:1180px;
-  margin:0 auto;
-  padding:70px 24px 90px;
-
-  background:#fff;
-}
-
-.collection-heading{
-  text-align:center;
-  margin-bottom:42px;
-}
-
-.collection-heading h2{
-  margin:0 0 8px;
-
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:35px;
-  font-weight:400;
-  letter-spacing:.04em;
-}
-
-.collection-heading p{
-  margin:0;
-  color:var(--muted);
-  font-size:14px;
-  letter-spacing:.08em;
-}
-
-/* ---------- 五個分類 ---------- */
-
-.collection-grid{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:12px;
-}
-
-.collection-card{
-  grid-column:span 2;
-
-  background:#f3f0ed;
-
-  border:0;
-  padding:0;
-
-  overflow:hidden;
-  cursor:pointer;
-
-  text-align:center;
-}
-
-.collection-card:nth-child(4){
-  grid-column:2 / span 2;
-}
-
-.collection-card:nth-child(5){
-  grid-column:4 / span 2;
-}
-
-.collection-image{
-  width:100%;
-  aspect-ratio:4 / 5;
-
-  background:#eeeae6;
-  overflow:hidden;
-}
-
-.collection-image img{
-  width:100%;
-  height:100%;
-  display:block;
-  object-fit:cover;
-
-  transition:transform .45s ease;
-}
-
-.collection-card:hover .collection-image img{
-  transform:scale(1.025);
-}
-
-.collection-info{
-  padding:20px 10px 22px;
-  background:#f7f5f3;
-}
-
-.collection-info h3{
-  margin:0 0 8px;
-
-  font-family:Georgia,"Times New Roman",serif;
-  font-size:19px;
-  font-weight:400;
-}
-
-.collection-info span{
-  font-size:10px;
-  letter-spacing:.15em;
-}
-
-/* ---------- 原本 panel 精品化 ---------- */
 
 .panel{
   background:#fff !important;
-  border:1px solid var(--line) !important;
-  border-radius:4px !important;
-  box-shadow:none !important;
 }
-
-/* ---------- 原本紫色按鈕改黑 ---------- */
-
-.purple{
-  background:#181818 !important;
-  color:#fff !important;
-
-  border:1px solid #181818 !important;
-  border-radius:3px !important;
-
-  box-shadow:none !important;
-  font-weight:500 !important;
-}
-
-.purple:hover{
-  background:#333 !important;
-}
-
-/* ---------- 次要按鈕 ---------- */
-
-.secondary{
-  background:#fff !important;
-  color:#181818 !important;
-
-  border:1px solid #d8d3ce !important;
-  border-radius:3px !important;
-
-  box-shadow:none !important;
-}
-
-/* ---------- 輸入框 ---------- */
 
 input,
 select,
 textarea{
   background:#fff !important;
-  color:#181818 !important;
-
-  border:1px solid #d8d3ce !important;
-  border-radius:3px !important;
-
-  box-shadow:none !important;
+  color:#171717 !important;
 }
-
-input:focus,
-select:focus,
-textarea:focus{
-  outline:none !important;
-  border-color:#181818 !important;
-}
-
-/* ---------- 手機 ---------- */
-
-@media(max-width:700px){
-
-  .luxury-header{
-    height:64px;
-    padding:0 18px;
-  }
-
-  .brand-name{
-    font-size:18px;
-  }
-
-  .header-actions{
-    gap:14px;
-  }
-
-  .hero-luxury{
-    display:flex;
-    flex-direction:column-reverse;
-    min-height:auto;
-  }
-
-  .hero-photo{
-    min-height:390px;
-    height:390px;
-  }
-
-  .hero-copy{
-    padding:38px 25px 45px;
-  }
-
-  .hero-copy h1{
-    font-size:44px;
-  }
-
-  .collection-section{
-    padding:48px 16px 65px;
-  }
-
-  .collection-heading h2{
-    font-size:29px;
-  }
-
-  .collection-grid{
-  grid-template-columns:1fr;
-  gap:36px;
-}
-
-  .collection-card,
-  .collection-card:nth-child(4),
-  .collection-card:nth-child(5){
-    grid-column:auto;
-  }
-
-  .collection-card:last-child{
-    grid-column:1 / -1;
-  }
-
-  .collection-image{
-    aspect-ratio:1 / 1;
-  }
-
-  .collection-info{
-    padding:15px 5px 17px;
-  }
-
-  .collection-info h3{
-    font-size:16px;
-  }
-}
-/* 手機版分類：2 + 2 + 1 */
-@media screen and (max-width:700px){
-
-  #collectionCards{
-    display:grid !important;
-    grid-template-columns:repeat(2, 1fr) !important;
-    gap:14px !important;
-    width:100% !important;
-  }
-
-  #collectionCards .collection-card{
-    width:100% !important;
-    margin:0 !important;
-  }
-
-  #collectionCards .collection-image{
-    width:100% !important;
-    aspect-ratio:1 / 1 !important;
-  }
-
-  #collectionCards .collection-card:last-child{
-    grid-column:1 / -1 !important;
-    width:calc(50% - 7px) !important;
-    justify-self:center !important;
-  }
-}
-</style></head>
+</style>
 <body><header><div class="brand">RELX & ILIA</div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
 <main class="wrap">
-<section id="shop">
-
-  <!-- 精品首頁主視覺 -->
-  <div class="hero-luxury">
-
-    <div class="hero-copy">
-      <div class="small">ILIA & MORE</div>
-
-      <h1>SCENT<br>COLLECTION</h1>
-
-      <p class="cn">香氛精油</p>
-
-      <p class="small">DISCOVER YOUR SCENT</p>
-
-      <button class="luxury-btn"
-        onclick="document.getElementById('collectionSection').scrollIntoView({behavior:'smooth'})">
-        EXPLORE COLLECTION
-      </button>
-
-      <div id="sync" class="muted" style="margin-top:22px">
-        同步中…
-      </div>
-    </div>
-
-    <div class="hero-photo">
-      <img src="images/hero.jpg" alt="ILIA & MORE">
-    </div>
-
-  </div>
-
-
-  <!-- 五大分類 -->
-  <div class="collection-section" id="collectionSection">
-
-    <div class="collection-heading">
-      <h2>OUR COLLECTION</h2>
-      <p>選擇你喜歡的系列</p>
-    </div>
-
-    <div class="collection-grid" id="collectionCards"></div>
-
-  </div>
-
-
-  <!-- 原本商品功能 -->
-  <div style="max-width:1180px;margin:0 auto;padding:40px 24px 90px">
-
-    <div class="tabs" id="tabs"></div>
-
-    <div class="grid" id="products"></div>
-
-  </div>
-
-</section>
-   
+<section id="shop"><div class="hero"><h1>🤍香氛精油💙</h1><div>加購$150指定主機顏色</div><div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
 <section id="cart" class="hidden"><div class="panel"><button class="backBtn" onclick="show('shop')">← 返回購物</button><h2>購物車</h2><div id="rows"></div><p><b>共 <span id="tq">0</span> 件</b></p><button class="purple wide" onclick="goCheckout()">前往填寫取貨資料</button><button class="wide" onclick="show('shop')">繼續購物</button></div></section>
 <section id="checkout" class="hidden"><div class="panel">
 <button type="button" class="secondary" onclick="show('cart')">← 返回購物車</button>
@@ -545,38 +122,8 @@ async function load(){try{
    let six=all.slice(22,28).filter(r=>(r[3]||"").trim()).map((r,i)=>({key:"4-six-"+i,name:(r[3]||"").trim(),stock:Math.max(0,parseInt(r[4])||0),sub:"六代主機",price:1200}));
    return {name:"主機",items:[...five,...six]};
  });
- document.getElementById("sync").textContent="✓ 庫存已更新";renderTabs();ensureCandyTitle();renderCollections();render()
+ document.getElementById("sync").textContent="✓ 庫存已更新";renderTabs();ensureCandyTitle();render()
 }catch(e){document.getElementById("sync").textContent="庫存同步失敗"}}
-function renderCollections(){
-  const box=document.getElementById("collectionCards");
-  if(!box)return;
-
-  box.innerHTML=groups.map((g,i)=>`
-    <button class="collection-card"
-      onclick="
-        active=${i};
-        renderTabs();
-        render();
-        document.getElementById('products').scrollIntoView({
-          behavior:'smooth'
-        });
-      ">
-
-      <div class="collection-image">
-        <img
-          src="images/category${i+1}.jpg"
-          alt="${g.name}"
-          onerror="this.style.opacity='.15'">
-      </div>
-
-      <div class="collection-info">
-        <h3>${g.name}</h3>
-        <span>EXPLORE →</span>
-      </div>
-
-    </button>
-  `).join("");
-}
 function renderTabs(){document.getElementById("tabs").innerHTML=groups.map((g,i)=>`<button class="tab ${i===active?"on":""}" onclick="active=${i};renderTabs();render()">${g.name}</button>`).join("")}
 function ensureCandyTitle(){
  let tabs=document.getElementById("tabs");

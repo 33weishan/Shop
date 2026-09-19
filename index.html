@@ -585,9 +585,17 @@ document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)
  return Object.values(gs).map(g=>`<b>${esc(g.cat)}</b>${g.pack?`｜${esc(g.pack)}`:""}<br>`+g.items.map(x=>`${esc(x.productName)} × ${x.quantity}`).join("<br>")).join("<br><br>");
 })();
 cart={};localStorage.removeItem("shop_cart");count();await load();show("done")}catch(e){m.textContent="⚠️ "+e.message+"（訂單編號："+orderId+"）"}finally{sending=false;b.disabled=false}}
-function finish(){document.getElementById("name").value="";document.getElementById("phone").value="";document.getElementById("storeType").value="7-ELEVEN";document.getElementById("storeName").value="";
-document.getElementById("storeVerify").classList.add("hidden");
-document.getElementById("msg").classList.add("hidden");show("shop")}
+function finish(){
+  document.getElementById("name").value="";
+  document.getElementById("phone").value="";
+  document.getElementById("contactAccount").value="";
+  document.getElementById("feedback").value="";
+  document.getElementById("storeType").value="7-ELEVEN";
+  document.getElementById("storeName").value="";
+  document.getElementById("storeVerify").classList.add("hidden");
+  document.getElementById("msg").classList.add("hidden");
+  show("shop")
+}
 function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 count();
    

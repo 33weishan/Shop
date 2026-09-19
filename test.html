@@ -77,7 +77,51 @@ h3,
 .brand{
   letter-spacing: 1px;
 }
-      
+/* ===== 返回類按鈕：取消黑底，只留黑色粗體字 ===== */
+
+.backBtn,
+button.secondary{
+  background:transparent !important;
+  background-color:transparent !important;
+  color:#171717 !important;
+  border:none !important;
+  box-shadow:none !important;
+  font-weight:700 !important;
+  font-size:20px !important;
+  padding:8px 0 !important;
+  width:auto !important;
+  border-radius:0 !important;
+}
+
+
+/* ===== 購物車底部：繼續購物 ===== */
+
+#cart button.wide:not(.purple){
+  background:transparent !important;
+  background-color:transparent !important;
+  color:#171717 !important;
+  border:none !important;
+  box-shadow:none !important;
+  font-size:20px !important;
+  font-weight:700 !important;
+  padding:14px 0 !important;
+  border-radius:0 !important;
+}
+
+
+/* ===== 結帳頁底部：返回購物車 ===== */
+
+#checkout button.wide:not(.purple){
+  background:transparent !important;
+  background-color:transparent !important;
+  color:#171717 !important;
+  border:none !important;
+  box-shadow:none !important;
+  font-size:20px !important;
+  font-weight:700 !important;
+  padding:14px 0 !important;
+  border-radius:0 !important;
+}      
 </style>
 <body><header><div class="brand">RELX & ILIA</div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
 <main class="wrap">

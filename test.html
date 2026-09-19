@@ -383,6 +383,32 @@ textarea:focus{
     font-size:16px;
   }
 }
+/* 手機版分類：2 + 2 + 1 */
+@media screen and (max-width:700px){
+
+  #collectionCards{
+    display:grid !important;
+    grid-template-columns:repeat(2, 1fr) !important;
+    gap:14px !important;
+    width:100% !important;
+  }
+
+  #collectionCards .collection-card{
+    width:100% !important;
+    margin:0 !important;
+  }
+
+  #collectionCards .collection-image{
+    width:100% !important;
+    aspect-ratio:1 / 1 !important;
+  }
+
+  #collectionCards .collection-card:last-child{
+    grid-column:1 / -1 !important;
+    width:calc(50% - 7px) !important;
+    justify-self:center !important;
+  }
+}
 </style></head>
 <body><header><div class="brand">RELX & ILIA</div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
 <main class="wrap">

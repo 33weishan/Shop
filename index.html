@@ -283,7 +283,11 @@ button.secondary{
 <input id="storeName" inputmode="numeric" maxlength="6" placeholder="請輸入6碼門市店號" oninput="storeChanged()">
 <a class="purple wide" style="display:block;text-align:center;text-decoration:none" href="https://emap.pcsc.com.tw/emap.aspx" target="_blank" rel="noopener">不知道店號？查詢 7-ELEVEN 門市</a>
 <div id="storeVerify" class="result hidden"></div>
+<label>IG / LINE 聯絡帳號（必填）</label>
+<input id="contactAccount" placeholder="請輸入LINE ID / IG帳號">
 
+<label>賣場問題反饋與意見（選填）</label>
+<textarea id="feedback" placeholder="如有任何問題或建議，歡迎留言"></textarea>
 
 <div id="msg" class="result hidden"></div>
 <button id="orderBtn" class="purple wide" onclick="submitOrder()">確認送出訂單</button>
@@ -556,11 +560,22 @@ function storeChanged(){
  }
  box.innerHTML="✓ 店號格式正確：<b>"+esc(v)+"</b>";
 }
-async function submitOrder(){if(sending)return;let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\s/g,""),storeType=document.getElementById("storeType").value,storeName=document.getElementById("storeName").value.trim(),m=document.getElementById("msg");
-if(!name)return alert("請填寫姓名");if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");if(!storeType)return alert("請選擇取貨超商");
+async function submitOrder(){if(sending)return;let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\s/g,""),storeType=document.getElementById("storeType").value,storeName=document.getElementById("storeName").value.trim(),contactAccount=document.getElementById("contactAccount").value.trim(),feedback=document.getElementById("feedback").value.trim(),m=document.getElementById("msg");
+if(!name)return alert("請填寫姓名");if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");if(!contactAccount)return alert("請輸入LINE ID / IG帳號");if(!storeType)return alert("請選擇取貨超商");
 if(!/^\d{6}$/.test(storeName))return alert("請輸入6碼 7-ELEVEN 門市店號");
 let items=[];Object.entries(cart).forEach(([bundleKey,b])=>b.items.forEach(x=>{let p=find(x.key);items.push({bundleKey:bundleKey,category:b.category,subCategory:p.sub||"",packageLabel:b.packageLabel,packagePrice:b.price,productName:p.name,quantity:x.qty})}));;let orderId=makeId();let orderMeta={productType:"香水",temperature:"常溫",totalAmount:orderTotal()};sending=true;let b=document.getElementById("orderBtn");b.disabled=true;m.classList.remove("hidden");m.textContent="訂單送出中，請勿重複按…";
-try{await postNoCors({orderId,customer:{name,phone,storeType,storeName},items});let d=await waitResult(orderId);if(!d.success){m.textContent="❌ "+(d.message||"訂單失敗");await load();return}
+try{await postNoCors({
+  orderId,
+  customer:{
+    name,
+    phone,
+    storeType,
+    storeName,
+    contactAccount,
+    feedback
+  },
+  items
+});let d=await waitResult(orderId);if(!d.success){m.textContent="❌ "+(d.message||"訂單失敗");await load();return}
 document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)}</b><br>姓名：${esc(d.customer.name)}<br>手機：${esc(d.customer.phone)}<br>取貨超商：${esc(d.customer.storeType)}<br>取貨門市：${esc(d.customer.storeName)}<br><br>商品：<br>`+(()=>{
  let gs={};
  (d.items||[]).forEach(x=>{

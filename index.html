@@ -531,7 +531,7 @@ function showCart(){
  if(!entries.length)el.innerHTML="<p>購物車目前是空的。</p>";
  else{
   let grouped={};entries.forEach(([k,b])=>{let cat=b.category||"其他";(grouped[cat]||(grouped[cat]=[])).push([k,b])});
-  el.innerHTML=Object.entries(grouped).map(([cat,arr])=>`<div class="catTitle">${esc(cat)}</div>`+arr.map(([bk,b])=>`<div class="card" style="margin:10px 0"><b>${esc(b.packageLabel)}｜$${b.price}</b>${b.category==="主機"?` <span class="muted">／包</span>`:""}<div class="muted" style="margin-top:7px">${b.items.map(x=>{let p=find(x.key);return esc(p.name)+" × "+x.qty}).join("、")}</div><button style="margin-top:10px" onclick="delete cart['${bk}'];count();showCart()">刪除此套組</button></div>`).join("")).join("");
+  el.innerHTML=Object.entries(grouped).map(([cat,arr])=>`<div class="catTitle">${esc(cat)}</div>`+arr.map(([bk,b])=>`<div class="card" style="margin:10px 0"><b>${esc(b.packageLabel)}｜$${b.price}</b>${b.category==="主機"?` <span class="muted">／隻</span>`:""}<div class="muted" style="margin-top:7px">${b.items.map(x=>{let p=find(x.key);return esc(p.name)+" × "+x.qty}).join("、")}</div><button style="margin-top:10px" onclick="delete cart['${bk}'];count();showCart()">刪除此套組</button></div>`).join("")).join("");
  }
  document.getElementById("tq").textContent=Object.values(cart).reduce((s,b)=>s+b.items.reduce((a,x)=>a+x.qty,0),0);
  let totalBox=document.getElementById("orderTotalBox");

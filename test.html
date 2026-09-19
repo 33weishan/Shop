@@ -295,8 +295,6 @@ async function load(){try{
 }catch(e){document.getElementById("sync").textContent="庫存同步失敗"}}
 function renderTabs(){document.getElementById("tabs").innerHTML=groups.map((g,i)=>`<button class="tab ${i===active?"on":""}" onclick="active=${i};renderTabs();render()">${g.name}</button>`).join("")}
 function ensureCandyTitle(){
-  return;
-}
  let tabs=document.getElementById("tabs");
  if(!tabs)return;
  let t=document.getElementById("candyTitle");

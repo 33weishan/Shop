@@ -523,9 +523,10 @@ function giftOptions(cp,cat){
   if(!cp || !["c1a","c1b"].includes(cp.id)) return "";
 
   const choice = giftChoice[cat] || {
-    mode:"auto",
-    flavor:""
-  };
+  mode:"auto",
+  flavor1:"",
+  flavor2:""
+};
 
   giftChoice[cat] = choice;
 
@@ -555,11 +556,11 @@ function giftOptions(cp,cat){
   );
 
    const actualGiftSub = sixAllOut
-  ? "五棒棒糖"
+  ? "五代主機"
   : giftSub;
 
 const actualGiftName = sixAllOut
-  ? "五棒棒糖 2 包"
+  ? "五代主機 2 隻"
   : giftName;
 
 const actualFlavors = candyGroup
@@ -608,18 +609,43 @@ ${
           <div style="margin-top:10px">
             <b>指定顏色：</b>
 
-            <select onchange="setGiftFlavor('${cat}',this.value)">
-              <option value="">請選擇顏色</option>
+            <div style="margin-top:8px">
+  <b>${sixAllOut ? "第 1 隻顏色：" : "指定顏色："}</b>
 
-              ${actualFlavors.map(p=>`
-                <option
-                  value="${esc(p.name)}"
-                  ${choice.flavor===p.name ? "selected" : ""}>
-                  ${esc(p.name)}｜庫存 ${p.stock}
-                </option>
-              `).join("")}
+  <select onchange="setGiftFlavor('${cat}',1,this.value)">
+    <option value="">請選擇顏色</option>
 
-            </select>
+    ${actualFlavors.map(p=>`
+      <option
+        value="${esc(p.name)}"
+        ${choice.flavor1===p.name ? "selected" : ""}>
+        ${esc(p.name)}｜庫存 ${p.stock}
+      </option>
+    `).join("")}
+  </select>
+</div>
+
+${
+  sixAllOut
+  ? `
+    <div style="margin-top:10px">
+      <b>第 2 隻顏色：</b>
+
+      <select onchange="setGiftFlavor('${cat}',2,this.value)">
+        <option value="">請選擇顏色</option>
+
+        ${actualFlavors.map(p=>`
+          <option
+            value="${esc(p.name)}"
+            ${choice.flavor2===p.name ? "selected" : ""}>
+            ${esc(p.name)}｜庫存 ${p.stock}
+          </option>
+        `).join("")}
+      </select>
+    </div>
+  `
+  : ""
+}
 
             ${
               actualFlavors.length===0
@@ -636,18 +662,29 @@ ${
 function setGiftMode(cat,mode){
   giftChoice[cat]={
     mode:mode,
-    flavor:""
+    flavor1:"",
+    flavor2:""
   };
   render();
 }
 
-function setGiftFlavor(cat,flavor){
+function setGiftFlavor(cat,index,flavor){
   if(!giftChoice[cat]){
-    giftChoice[cat]={mode:"choose",flavor:""};
+    giftChoice[cat]={
+      mode:"choose",
+      flavor1:"",
+      flavor2:""
+    };
   }
 
-  giftChoice[cat].flavor=flavor;
-}   
+  if(index===1){
+    giftChoice[cat].flavor1=flavor;
+  }
+
+  if(index===2){
+    giftChoice[cat].flavor2=flavor;
+  }
+}  
 function productPicker(p,cat,isC5){
  let q=draft[p.key]||0;
  return `<div class="card"><div class="name">${esc(p.name)}</div><div class="stock">庫存 ${p.stock}</div><div class="qty"><button onclick="pick('${p.key}',-1,'${cat}',${isC5})">−</button><input type="number" min="0" max="${p.stock}" value="${q}" inputmode="numeric" onchange="pickSet('${p.key}',this.value,'${cat}',${isC5})"><button onclick="pick('${p.key}',1,'${cat}',${isC5})">＋</button></div>${isC5?`<button class="add" style="margin-top:10px" onclick="addC5('${p.key}')">加入購物車</button>`:""}</div>`;
@@ -699,7 +736,145 @@ function choosePack(cat,id){
 function draftTotal(cat){let gi=SPECS.findIndex(x=>x.label===cat);return Object.entries(draft).filter(([k])=>k.startsWith(gi+"-")).reduce((s,[,q])=>s+q,0)}
 function pick(k,d,cat,isC5){let p=find(k),n=Math.max(0,(draft[k]||0)+d);if(!isC5){let cp=chosenPackage[cat],other=draftTotal(cat)-(draft[k]||0);n=Math.min(n,Math.max(0,cp.target-other))}draft[k]=Math.min(n,p.stock);render()}
 function pickSet(k,v,cat,isC5){let p=find(k),n=Math.max(0,parseInt(v,10)||0);if(!isC5){let cp=chosenPackage[cat],other=draftTotal(cat)-(draft[k]||0);n=Math.min(n,Math.max(0,cp.target-other))}draft[k]=Math.min(n,p.stock);render()}
-function addPackage(cat){let cp=chosenPackage[cat];if(!cp)return;if(draftTotal(cat)!==cp.target)return alert("必須剛好選滿 "+cp.target+" 顆");let gi=SPECS.findIndex(x=>x.label===cat),items=[];Object.entries(draft).forEach(([k,q])=>{if(q>0&&k.startsWith(gi+"-"))items.push({key:k,qty:q})});let bundleKey="B-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);cart[bundleKey]={bundle:true,category:cat,packageId:cp.id,packageLabel:cp.label,price:cp.price,target:cp.target,items};items.forEach(x=>delete draft[x.key]);count();showCart()}
+function addPackage(cat){
+  let cp=chosenPackage[cat];
+  if(!cp)return;
+
+  if(draftTotal(cat)!==cp.target){
+    return alert("必須剛好選滿 "+cp.target+" 顆");
+  }
+
+  let gift=null;
+
+  // 只有 c1a / c1b 有贈品
+  if(["c1a","c1b"].includes(cp.id)){
+
+    const candyGroup=groups.find(g=>g.name==="主機");
+
+    const sixAllOut=
+      cp.id==="c1b" &&
+      !candyGroup?.items.some(p=>
+        p.sub==="六代主機" &&
+        Number(p.stock)>0
+      );
+
+    const choice=giftChoice[cat]||{
+      mode:"auto",
+      flavor1:"",
+      flavor2:""
+    };
+
+    // c1a = 五棒1包
+    // c1b正常 = 六棒1包
+    // c1b六棒缺貨 = 五棒2包
+    const giftSub=
+      cp.id==="c1a"
+        ? "五代主機"
+        : sixAllOut
+          ? "五代主機"
+          : "六代主機";
+
+    const giftQty=sixAllOut ? 2 : 1;
+
+    const available=candyGroup
+      ? candyGroup.items.filter(p=>
+          p.sub===giftSub &&
+          Number(p.stock)>0
+        )
+      : [];
+
+    if(available.length===0){
+      return alert(giftSub+"目前沒有庫存");
+    }
+
+    // 客人指定顏色
+    if(choice.mode==="choose"){
+
+      if(!choice.flavor1){
+        return alert("請選擇贈品顏色");
+      }
+
+      if(giftQty===2 && !choice.flavor2){
+        return alert("請選擇第2隻贈品顏色");
+      }
+
+      const first=available.find(p=>p.name===choice.flavor1);
+
+      if(!first){
+        return alert("第1隻贈品顏色目前沒有庫存");
+      }
+
+      // 五代主機2隻時檢查第2隻
+      if(giftQty===2){
+
+        const second=available.find(p=>p.name===choice.flavor2);
+
+        if(!second){
+          return alert("第2隻贈品顏色目前沒有庫存");
+        }
+
+        // 同顏色選2隻，庫存必須至少2
+        if(
+          choice.flavor1===choice.flavor2 &&
+          Number(first.stock)<2
+        ){
+          return alert(
+            choice.flavor1+
+            "目前只剩 "+first.stock+
+            " 隻，不能選2隻"
+          );
+        }
+      }
+    }
+
+    gift={
+      type:giftSub,
+      quantity:giftQty,
+      mode:choice.mode,
+      flavor1:choice.mode==="choose" ? choice.flavor1 : "",
+      flavor2:
+        choice.mode==="choose" && giftQty===2
+          ? choice.flavor2
+          : "",
+      extraPrice:choice.mode==="choose" ? 150 : 0,
+      replacedFromSix:sixAllOut
+    };
+  }
+
+  let gi=SPECS.findIndex(x=>x.label===cat);
+  let items=[];
+
+  Object.entries(draft).forEach(([k,q])=>{
+    if(q>0&&k.startsWith(gi+"-")){
+      items.push({
+        key:k,
+        qty:q
+      });
+    }
+  });
+
+  let bundleKey=
+    "B-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
+
+  cart[bundleKey]={
+    bundle:true,
+    category:cat,
+    packageId:cp.id,
+    packageLabel:cp.label,
+    price:cp.price,
+    target:cp.target,
+    items,
+    gift
+  };
+
+  items.forEach(x=>delete draft[x.key]);
+
+  // 加入購物車後清掉這次贈品選擇
+  delete giftChoice[cat];
+
+  count();
+  showCart();
+}
 function addC5(k){let q=draft[k]||0,p=find(k);if(q<=0)return alert("請先選擇數量");let bundleKey="C5-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);cart[bundleKey]={bundle:true,category:"主機",packageLabel:p.sub,price:p.price,target:q,items:[{key:k,qty:q}]};draft[k]=0;count();showCart()}
 function find(k){for(let g of groups){let p=g.items.find(x=>x.key===k);if(p)return p}}
 function add(k){let p=find(k),q=cart[k]||0;if(q<p.stock)cart[k]=q+1;count()}

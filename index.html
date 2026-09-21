@@ -279,6 +279,13 @@ button.secondary{
 <label>手機號碼（必填）</label><input id="phone" inputmode="tel" maxlength="10" placeholder="09xxxxxxxx">
 <label>IG / LINE 聯絡帳號（必填）</label>
 <input id="contactAccount" placeholder="請輸入LINE ID / IG帳號">
+<label>輸入代理碼（選填）</label>
+<input id="agentCode" placeholder="如有代理碼請輸入" autocomplete="off" oninput="checkAgentCode()">
+<div id="agentCodeResult" class="result hidden"></div>
+<div id="bossPriceBox" class="hidden">
+<label>老闆給你什麼金額？</label>
+<input id="bossPrice" type="number" inputmode="numeric" min="1" placeholder="請輸入老闆給你的優惠價">
+</div>
 <label>取貨超商</label>
 <input id="storeType" value="7-ELEVEN" readonly>
 <label>7-ELEVEN 門市店號（必填）</label>
@@ -294,6 +301,53 @@ button.secondary{
 <p class="muted">送出後系統會再次確認庫存。訂單成立後才會扣除庫存。</p></div></section>
 <section id="done" class="hidden"><div class="panel"><h2>✓ 訂單已成立</h2><div id="receipt" class="summary"></div><p class="muted">我們會盡快處理您的訂單。</p><button class="purple wide" onclick="finish()">完成</button></div></section>
 </main><script>
+   
+function checkAgentCode() {
+  const input = document.getElementById('agentCode');
+  const result = document.getElementById('agentCodeResult');
+  const bossPriceBox = document.getElementById('bossPriceBox');
+  const bossPrice = document.getElementById('bossPrice');
+
+  const code = String(input.value || '').trim().toLowerCase();
+
+  // 預設先把優惠價輸入框隱藏
+  bossPriceBox.classList.add('hidden');
+
+  if (!code) {
+    result.classList.add('hidden');
+    result.textContent = '';
+    bossPrice.value = '';
+    return;
+  }
+
+  if (code === 'alan111') {
+    result.textContent = '✓ Alan 代理單';
+    result.classList.remove('hidden');
+    bossPrice.value = '';
+    return;
+  }
+
+  if (code === 'ding000') {
+    result.textContent = '✓ 丁丁 代理單';
+    result.classList.remove('hidden');
+    bossPrice.value = '';
+    return;
+  }
+
+  if (code === 'bossvip') {
+    result.textContent = '✓ 老闆優惠價';
+    result.classList.remove('hidden');
+
+    // 只有 bossvip 才顯示優惠價輸入框
+    bossPriceBox.classList.remove('hidden');
+    return;
+  }
+
+  result.textContent = '代理碼無效，請確認後重新輸入';
+  result.classList.remove('hidden');
+  bossPrice.value = '';
+}
+   
 const CSV="https://docs.google.com/spreadsheets/d/1I1i9bTTNYsNlg8qkSi9VLOmci-IplxfBANU-cEJDFoc/export?format=csv&gid=121866907";
 const API="https://script.google.com/macros/s/AKfycbxyJSU-_4X3gOCRvfEoEhe2ETWkQjXBcHCTIco4BubYDziINuOYCwLPaCvvzTrimUDU/exec";
 const SPECS=[
@@ -559,20 +613,43 @@ function storeChanged(){
  }
  box.innerHTML="✓ 店號格式正確：<b>"+esc(v)+"</b>";
 }
-async function submitOrder(){if(sending)return;let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\s/g,""),storeType=document.getElementById("storeType").value,storeName=document.getElementById("storeName").value.trim(),contactAccount=document.getElementById("contactAccount").value.trim(),feedback=document.getElementById("feedback").value.trim(),m=document.getElementById("msg");
-if(!name)return alert("請填寫姓名");if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");if(!contactAccount)return alert("請輸入LINE ID / IG帳號");if(!storeType)return alert("請選擇取貨超商");
+async function submitOrder(){if(sending)return;let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\s/g,""),storeType=document.getElementById("storeType").value,storeName=document.getElementById("storeName").value.trim(),contactAccount=document.getElementById("contactAccount").value.trim(),feedback=document.getElementById("feedback").value.trim(),agentCode=document.getElementById("agentCode").value.trim().toLowerCase(),bossPrice=document.getElementById("bossPrice").value.trim(),m=document.getElementById("msg");
+if(!name)return alert("請填寫姓名");
+if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");
+if(!contactAccount)return alert("請輸入LINE ID / IG帳號");
+if(agentCode && !["alan111","ding000","bossvip"].includes(agentCode)){
+  return alert("代理碼無效，請確認後重新輸入");
+}
+if(agentCode==="bossvip"){
+  const price=Number(bossPrice);
+  if(!bossPrice || !Number.isFinite(price) || price<=0){
+    return alert("請輸入老闆給你的優惠價");
+  }
+}
+if(!storeType)return alert("請選擇取貨超商");
 if(!/^\d{6}$/.test(storeName))return alert("請輸入6碼 7-ELEVEN 門市店號");
-let items=[];Object.entries(cart).forEach(([bundleKey,b])=>b.items.forEach(x=>{let p=find(x.key);items.push({bundleKey:bundleKey,category:b.category,subCategory:p.sub||"",packageLabel:b.packageLabel,packagePrice:b.price,productName:p.name,quantity:x.qty})}));;let orderId=makeId();let orderMeta={productType:"香水",temperature:"常溫",totalAmount:orderTotal()};sending=true;let b=document.getElementById("orderBtn");b.disabled=true;m.classList.remove("hidden");m.textContent="訂單送出中，請勿重複按…";
+let items=[];Object.entries(cart).forEach(([bundleKey,b])=>b.items.forEach(x=>{let p=find(x.key);items.push({bundleKey:bundleKey,category:b.category,subCategory:p.sub||"",packageLabel:b.packageLabel,packagePrice:b.price,productName:p.name,quantity:x.qty})}));;let orderId=makeId();
+let finalTotal = agentCode === "bossvip"
+  ? Number(bossPrice)
+  : orderTotal();
+
+let orderMeta={
+  productType:"香水",
+  temperature:"常溫",
+  totalAmount:finalTotal
+};
+sending=true;let b=document.getElementById("orderBtn");b.disabled=true;m.classList.remove("hidden");m.textContent="訂單送出中，請勿重複按…";
 try{await postNoCors({
   orderId,
   customer:{
-    name,
-    phone,
-    storeType,
-    storeName,
-    contactAccount,
-    feedback
-  },
+  name,
+  phone,
+  storeType,
+  storeName,
+  contactAccount,
+  feedback,
+  agentCode
+},
   items
 });let d=await waitResult(orderId);if(!d.success){m.textContent="❌ "+(d.message||"訂單失敗");await load();return}
 document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)}</b><br>姓名：${esc(d.customer.name)}<br>手機：${esc(d.customer.phone)}<br>取貨超商：${esc(d.customer.storeType)}<br>取貨門市：${esc(d.customer.storeName)}<br><br>商品：<br>`+(()=>{

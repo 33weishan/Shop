@@ -547,9 +547,42 @@ function giftOptions(cp,cat){
       )
     : [];
 
+   const sixAllOut =
+  cp.id==="c1b" &&
+  !candyGroup?.items.some(p=>
+    p.sub==="六代主機" &&
+    Number(p.stock)>0
+  );
+
+   const actualGiftSub = sixAllOut
+  ? "五棒棒糖"
+  : giftSub;
+
+const actualGiftName = sixAllOut
+  ? "五棒棒糖 2 包"
+  : giftName;
+
+const actualFlavors = candyGroup
+  ? candyGroup.items.filter(p=>
+      p.sub===actualGiftSub &&
+      Number(p.stock)>0
+    )
+  : [];
+   
   return `
     <div class="panel" style="margin-top:14px">
-      <h3 style="margin-top:0">🎁 贈品選擇｜${giftName}</h3>
+      <h3 style="margin-top:0">🎁 贈品選擇｜${actualGiftName}</h3>
+
+${
+  sixAllOut
+  ? `
+    <div class="result" style="margin-bottom:12px">
+      ⚠️ 六代主機目前庫存 0<br>
+      贈品自動更換為 <b>五代主機 2 隻</b>
+    </div>
+  `
+  : ""
+}
 
       <label style="display:block;margin-bottom:10px">
         <input type="radio"
@@ -578,7 +611,7 @@ function giftOptions(cp,cat){
             <select onchange="setGiftFlavor('${cat}',this.value)">
               <option value="">請選擇顏色</option>
 
-              ${flavors.map(p=>`
+              ${actualFlavors.map(p=>`
                 <option
                   value="${esc(p.name)}"
                   ${choice.flavor===p.name ? "selected" : ""}>
@@ -589,7 +622,7 @@ function giftOptions(cp,cat){
             </select>
 
             ${
-              flavors.length===0
+              actualFlavors.length===0
               ? `<div style="margin-top:8px">目前沒有可指定的顏色</div>`
               : ""
             }

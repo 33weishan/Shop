@@ -591,7 +591,7 @@ ${
                value="auto"
                ${choice.mode==="auto" ? "checked" : ""}
                onchange="setGiftMode('${cat}','auto')">
-        不指定顏色（免費，系統自動出庫存最多的口味）
+        不指定顏色
       </label>
 
       <label style="display:block">
@@ -607,7 +607,6 @@ ${
         choice.mode==="choose"
         ? `
           <div style="margin-top:10px">
-            <b>指定顏色：</b>
 
             <div style="margin-top:8px">
   <b>${sixAllOut ? "第 1 隻顏色：" : "指定顏色："}</b>

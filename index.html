@@ -891,16 +891,119 @@ function count(){
 function show(id){["shop","cart","checkout","done"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));scrollTo(0,0)}
 function showCart(){
  let entries=Object.entries(cart),el=document.getElementById("rows");
- if(!entries.length)el.innerHTML="<p>購物車目前是空的。</p>";
- else{
-  let grouped={};entries.forEach(([k,b])=>{let cat=b.category||"其他";(grouped[cat]||(grouped[cat]=[])).push([k,b])});
-  el.innerHTML=Object.entries(grouped).map(([cat,arr])=>`<div class="catTitle">${esc(cat)}</div>`+arr.map(([bk,b])=>`<div class="card" style="margin:10px 0"><b>${esc(b.packageLabel)}｜$${b.price}</b>${b.category==="主機"?` <span class="muted">／隻</span>`:""}<div class="muted" style="margin-top:7px">${b.items.map(x=>{let p=find(x.key);return esc(p.name)+" × "+x.qty}).join("、")}</div><button style="margin-top:10px" onclick="delete cart['${bk}'];count();showCart()">刪除此套組</button></div>`).join("")).join("");
+
+ if(!entries.length){
+  el.innerHTML="<p>購物車目前是空的。</p>";
+ }else{
+  let grouped={};
+
+  entries.forEach(([k,b])=>{
+   let cat=b.category||"其他";
+   (grouped[cat]||(grouped[cat]=[])).push([k,b]);
+  });
+
+  el.innerHTML=Object.entries(grouped).map(([cat,arr])=>
+   `<div class="catTitle">${esc(cat)}</div>`+
+   arr.map(([bk,b])=>{
+
+    let giftHtml="";
+
+    if(b.gift){
+     const g=b.gift;
+
+     if(g.replacedFromSix){
+      giftHtml+=`
+       <div style="margin-top:8px">
+        ⚠️ 六代主機缺貨，贈品改為 <b>五代主機 2 隻</b>
+       </div>
+      `;
+     }
+
+     if(g.mode==="choose"){
+      if(g.quantity===2){
+       giftHtml+=`
+        <div style="margin-top:6px">
+         🎁 第1隻：<b>${esc(g.flavor1)}</b><br>
+         🎁 第2隻：<b>${esc(g.flavor2)}</b><br>
+         <span class="muted">指定顏色 +$150</span>
+        </div>
+       `;
+      }else{
+       giftHtml+=`
+        <div style="margin-top:6px">
+         🎁 贈品：${esc(g.type)} 1隻｜<b>${esc(g.flavor1)}</b><br>
+         <span class="muted">指定顏色 +$150</span>
+        </div>
+       `;
+      }
+     }else{
+      giftHtml+=`
+       <div style="margin-top:6px">
+        🎁 贈品：${esc(g.type)} ${g.quantity}包｜不指定顏色
+        <br>
+        <span class="muted">系統將依庫存最多的顏色出貨</span>
+       </div>
+      `;
+     }
+    }
+
+    const displayPrice=
+     Number(b.price||0)+
+     Number(b.gift?.extraPrice||0);
+
+    return `
+     <div class="card" style="margin:10px 0">
+
+      <b>
+       ${esc(b.packageLabel)}｜$${displayPrice}
+      </b>
+
+      ${b.category==="主機"
+       ? ` <span class="muted">／隻</span>`
+       : ""}
+
+      <div class="muted" style="margin-top:7px">
+       ${b.items.map(x=>{
+        let p=find(x.key);
+        return esc(p.name)+" × "+x.qty;
+       }).join("、")}
+      </div>
+
+      ${giftHtml}
+
+      <button
+       style="margin-top:10px"
+       onclick="delete cart['${bk}'];count();showCart()">
+       刪除此套組
+      </button>
+
+     </div>
+    `;
+   }).join("")
+  ).join("");
  }
- document.getElementById("tq").textContent=Object.values(cart).reduce((s,b)=>s+b.items.reduce((a,x)=>a+x.qty,0),0);
+
+ document.getElementById("tq").textContent=
+  Object.values(cart).reduce(
+   (s,b)=>s+b.items.reduce((a,x)=>a+x.qty,0),
+   0
+  );
+
  let totalBox=document.getElementById("orderTotalBox");
- if(!totalBox){totalBox=document.createElement("div");totalBox.id="orderTotalBox";totalBox.className="result";document.getElementById("tq").parentElement.appendChild(totalBox)}
- totalBox.innerHTML="<b>訂單總金額：$"+orderTotal().toLocaleString()+"</b><br>商品：香水｜溫層：常溫";
- show("cart")
+
+ if(!totalBox){
+  totalBox=document.createElement("div");
+  totalBox.id="orderTotalBox";
+  totalBox.className="result";
+  document.getElementById("tq").parentElement.appendChild(totalBox);
+ }
+
+ totalBox.innerHTML=
+  "<b>訂單總金額：$"+
+  orderTotal().toLocaleString()+
+  "</b><br>商品：香水｜溫層：常溫";
+
+ show("cart");
 }
 function goCheckout(){if(!Object.keys(cart).length)return alert("購物車沒有商品");show("checkout")}
 function makeId(){return "ORD-"+Date.now()+"-"+Math.random().toString(36).slice(2,9)}

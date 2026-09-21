@@ -1048,7 +1048,27 @@ if(agentCode==="bossvip"){
 }
 if(!storeType)return alert("請選擇取貨超商");
 if(!/^\d{6}$/.test(storeName))return alert("請輸入6碼 7-ELEVEN 門市店號");
-let items=[];Object.entries(cart).forEach(([bundleKey,b])=>b.items.forEach(x=>{let p=find(x.key);items.push({bundleKey:bundleKey,category:b.category,subCategory:p.sub||"",packageLabel:b.packageLabel,packagePrice:b.price,productName:p.name,quantity:x.qty})}));;let orderId=makeId();
+let items=[];
+
+Object.entries(cart).forEach(([bundleKey,b])=>{
+  b.items.forEach(x=>{
+    let p=find(x.key);
+
+    items.push({
+      bundleKey:bundleKey,
+      category:b.category,
+      subCategory:p.sub||"",
+      packageId:b.packageId||"",
+      packageLabel:b.packageLabel,
+      packagePrice:b.price,
+      productName:p.name,
+      quantity:x.qty,
+      gift:b.gift||null
+    });
+  });
+});
+
+let orderId=makeId();
 let finalTotal = agentCode === "bossvip"
   ? Number(bossPrice)
   : orderTotal();

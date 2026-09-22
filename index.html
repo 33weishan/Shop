@@ -420,7 +420,19 @@ async function load(){try{
  });
  document.getElementById("sync").textContent="✓ 庫存已更新";renderTabs();ensureCandyTitle();render()
 }catch(e){document.getElementById("sync").textContent="庫存同步失敗"}}
-function renderTabs(){document.getElementById("tabs").innerHTML=groups.map((g,i)=>`<button class="tab ${i===active?"on":""}" onclick="active=${i};renderTabs();render()">${g.name}</button>`).join("")}
+function renderTabs(){
+  document.getElementById("tabs").innerHTML=groups
+    .map((g,i)=>({g,i}))
+    .filter(x=>x.g.name!=="積木主機")
+    .map(x=>`
+      <button
+        class="tab ${x.i===active?"on":""}"
+        onclick="active=${x.i};renderTabs();render()">
+        ${x.g.name}
+      </button>
+    `)
+    .join("");
+}ㄒ
 function ensureCandyTitle(){
   return;
 }  

@@ -828,26 +828,7 @@ function setGiftMode(cat,mode){
   render();
 }
 
-function setGiftFlavor(cat,index,flavor){
-  if(!giftChoice[cat]){
-    giftChoice[cat]={
-      mode:"choose",
-      flavor1:"",
-      flavor2:""
-    };
-  }
-
-  if(index===1){
-    giftChoice[cat].flavor1=flavor;
-  }
-
-  if(index===2){
-    giftChoice[cat].flavor2=flavor;
-  }
-}  
-   function addC5Lollipop(key){
-  const p=find(key);
-
+c
   if(!p){
     return alert("找不到積木主機資料");
   }
@@ -877,6 +858,25 @@ function setGiftFlavor(cat,index,flavor){
 
   count();
   showCart();
+}
+   function setGiftFlavor(cat,index,flavor){
+  if(!giftChoice[cat]){
+    giftChoice[cat]={
+      mode:"choose",
+      flavor1:"",
+      flavor2:""
+    };
+  }
+
+  giftChoice[cat].mode="choose";
+
+  if(index===1){
+    giftChoice[cat].flavor1=flavor;
+  }
+
+  if(index===2){
+    giftChoice[cat].flavor2=flavor;
+  }
 }
 function productPicker(p,cat,isC5){
  let q=draft[p.key]||0;

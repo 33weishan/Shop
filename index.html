@@ -402,7 +402,7 @@ const PACKAGES={
   {id:"c5a",label:"單支積木主機",price:250,target:1},
   {id:"c5b",label:"1+1｜🥚＋積木主機",price:750,target:2},
   {id:"c5c",label:"5🥚送1積木主機",price:2500,target:5},
-  {id:"c5d",label:"10🥚送1積木主機+1🥚(口味任選)",price:4000,target:10}
+  {id:"c5d",label:"10🥚送1積木主機+1🥚(口味任選)",price:4000,target:11}
 ]
 };
 let chosenPackage={};
@@ -587,15 +587,101 @@ if(cat==="悅刻積木拋棄式22000口"){
   `;
 }
 function giftOptions(cp,cat){
-  if(!cp || !["c1a","c1b"].includes(cp.id)) return "";
+
+  if(!cp || !["c1a","c1b","c5b","c5c","c5d"].includes(cp.id)){
+    return "";
+  }
 
   const choice = giftChoice[cat] || {
-  mode:"auto",
-  flavor1:"",
-  flavor2:""
-};
+    mode:"auto",
+    flavor1:"",
+    flavor2:""
+  };
 
   giftChoice[cat] = choice;
+
+
+  // ==================================================
+  // 分類5：積木主機
+  // c5b / c5c / c5d 都是 1 隻
+  // ==================================================
+  if(["c5b","c5c","c5d"].includes(cp.id)){
+
+    const lollipopGroup=
+      groups.find(g=>g.name==="積木主機");
+
+    const actualFlavors = lollipopGroup
+      ? lollipopGroup.items.filter(p=>
+          Number(p.stock)>0
+        )
+      : [];
+
+    return `
+      <div class="panel" style="margin-top:14px">
+
+        <h3 style="margin-top:0">
+          🎁 積木主機｜1 隻
+        </h3>
+
+        <label style="display:block;margin-bottom:10px">
+          <input type="radio"
+                 name="gift-${cat}"
+                 value="auto"
+                 ${choice.mode==="auto" ? "checked" : ""}
+                 onchange="setGiftMode('${cat}','auto')">
+          不指定顏色
+        </label>
+
+        <label style="display:block">
+          <input type="radio"
+                 name="gift-${cat}"
+                 value="choose"
+                 ${choice.mode==="choose" ? "checked" : ""}
+                 onchange="setGiftMode('${cat}','choose')">
+          我要指定顏色（+$150）
+        </label>
+
+        ${
+          choice.mode==="choose"
+          ? `
+            <div style="margin-top:10px">
+
+              <b>指定口味：</b>
+
+              <select onchange="setGiftFlavor('${cat}',1,this.value)">
+                <option value="">請選擇口味</option>
+
+                ${actualFlavors.map(p=>`
+                  <option
+                    value="${esc(p.name)}"
+                    ${choice.flavor1===p.name ? "selected" : ""}>
+                    ${esc(p.name)}｜庫存 ${p.stock}
+                  </option>
+                `).join("")}
+
+              </select>
+
+              ${
+                actualFlavors.length===0
+                ? `<div style="margin-top:8px">
+                     目前沒有可指定的口味
+                   </div>`
+                : ""
+              }
+
+            </div>
+          `
+          : ""
+        }
+
+      </div>
+    `;
+  }
+
+
+  // ==================================================
+  // 以下維持原本 c1a / c1b 功能
+  // ==================================================
 
   const giftSub = cp.id==="c1a"
     ? "五代主機"
@@ -605,52 +691,48 @@ function giftOptions(cp,cat){
     ? "五代主機 1 隻"
     : "六代主機 1 隻";
 
-  // 直接使用網站目前已載入的主機商品與即時庫存
-  const candyGroup = groups.find(g=>g.name==="主機");
+  const candyGroup =
+    groups.find(g=>g.name==="棒棒糖");
 
-  const flavors = candyGroup
+  const sixAllOut =
+    cp.id==="c1b" &&
+    !candyGroup?.items.some(p=>
+      p.sub==="六代主機" &&
+      Number(p.stock)>0
+    );
+
+  const actualGiftSub = sixAllOut
+    ? "五代主機"
+    : giftSub;
+
+  const actualGiftName = sixAllOut
+    ? "五代主機 2 隻"
+    : giftName;
+
+  const actualFlavors = candyGroup
     ? candyGroup.items.filter(p=>
-        p.sub===giftSub &&
+        p.sub===actualGiftSub &&
         Number(p.stock)>0
       )
     : [];
 
-   const sixAllOut =
-  cp.id==="c1b" &&
-  !candyGroup?.items.some(p=>
-    p.sub==="六代主機" &&
-    Number(p.stock)>0
-  );
-
-   const actualGiftSub = sixAllOut
-  ? "五代主機"
-  : giftSub;
-
-const actualGiftName = sixAllOut
-  ? "五代主機 2 隻"
-  : giftName;
-
-const actualFlavors = candyGroup
-  ? candyGroup.items.filter(p=>
-      p.sub===actualGiftSub &&
-      Number(p.stock)>0
-    )
-  : [];
-   
   return `
     <div class="panel" style="margin-top:14px">
-      <h3 style="margin-top:0">🎁 贈品選擇｜${actualGiftName}</h3>
 
-${
-  sixAllOut
-  ? `
-    <div class="result" style="margin-bottom:12px">
-      ⚠️ 六代主機目前庫存 0<br>
-      贈品自動更換為 <b>五代主機 2 隻</b>
-    </div>
-  `
-  : ""
-}
+      <h3 style="margin-top:0">
+        🎁 贈品選擇｜${actualGiftName}
+      </h3>
+
+      ${
+        sixAllOut
+        ? `
+          <div class="result" style="margin-bottom:12px">
+            ⚠️ 六代主機目前庫存 0<br>
+            贈品自動更換為 <b>五代主機 2 隻</b>
+          </div>
+        `
+        : ""
+      }
 
       <label style="display:block;margin-bottom:10px">
         <input type="radio"
@@ -676,52 +758,64 @@ ${
           <div style="margin-top:10px">
 
             <div style="margin-top:8px">
-  <b>${sixAllOut ? "第 1 隻顏色：" : "指定顏色："}</b>
 
-  <select onchange="setGiftFlavor('${cat}',1,this.value)">
-    <option value="">請選擇顏色</option>
+              <b>
+                ${sixAllOut ? "第 1 隻顏色：" : "指定顏色："}
+              </b>
 
-    ${actualFlavors.map(p=>`
-      <option
-        value="${esc(p.name)}"
-        ${choice.flavor1===p.name ? "selected" : ""}>
-        ${esc(p.name)}｜庫存 ${p.stock}
-      </option>
-    `).join("")}
-  </select>
-</div>
+              <select onchange="setGiftFlavor('${cat}',1,this.value)">
+                <option value="">請選擇顏色</option>
 
-${
-  sixAllOut
-  ? `
-    <div style="margin-top:10px">
-      <b>第 2 隻顏色：</b>
+                ${actualFlavors.map(p=>`
+                  <option
+                    value="${esc(p.name)}"
+                    ${choice.flavor1===p.name ? "selected" : ""}>
+                    ${esc(p.name)}｜庫存 ${p.stock}
+                  </option>
+                `).join("")}
 
-      <select onchange="setGiftFlavor('${cat}',2,this.value)">
-        <option value="">請選擇顏色</option>
+              </select>
 
-        ${actualFlavors.map(p=>`
-          <option
-            value="${esc(p.name)}"
-            ${choice.flavor2===p.name ? "selected" : ""}>
-            ${esc(p.name)}｜庫存 ${p.stock}
-          </option>
-        `).join("")}
-      </select>
-    </div>
-  `
-  : ""
-}
+            </div>
+
+            ${
+              sixAllOut
+              ? `
+                <div style="margin-top:10px">
+
+                  <b>第 2 隻顏色：</b>
+
+                  <select onchange="setGiftFlavor('${cat}',2,this.value)">
+                    <option value="">請選擇顏色</option>
+
+                    ${actualFlavors.map(p=>`
+                      <option
+                        value="${esc(p.name)}"
+                        ${choice.flavor2===p.name ? "selected" : ""}>
+                        ${esc(p.name)}｜庫存 ${p.stock}
+                      </option>
+                    `).join("")}
+
+                  </select>
+
+                </div>
+              `
+              : ""
+            }
 
             ${
               actualFlavors.length===0
-              ? `<div style="margin-top:8px">目前沒有可指定的顏色</div>`
+              ? `<div style="margin-top:8px">
+                   目前沒有可指定的顏色
+                 </div>`
               : ""
             }
+
           </div>
         `
         : ""
       }
+
     </div>
   `;
 }

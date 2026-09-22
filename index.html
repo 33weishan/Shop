@@ -938,7 +938,57 @@ function addPackage(cat){
   }
 
   let gift=null;
+// ===== 悅刻積木拋棄式22000口：積木主機 =====
+if(["c5b","c5c","c5d"].includes(cp.id)){
 
+  const choice=giftChoice[cat]||{
+    mode:"auto",
+    flavor1:"",
+    flavor2:""
+  };
+
+  const lollipopGroup=
+    groups.find(g=>g.name==="積木棒棒糖");
+
+  const available=lollipopGroup
+    ? lollipopGroup.items.filter(p=>Number(p.stock)>0)
+    : [];
+
+  if(available.length===0){
+    return alert("積木主機目前沒有庫存");
+  }
+
+  // 指定顏色
+  if(choice.mode==="choose"){
+
+    if(!choice.flavor1){
+      return alert("請選擇積木主機顏色");
+    }
+
+    const selected=
+      available.find(p=>p.name===choice.flavor1);
+
+    if(!selected){
+      return alert("這個積木主機口味目前沒有庫存");
+    }
+  }
+
+  gift={
+    type:"積木主機",
+    quantity:1,
+    mode:choice.mode,
+    flavor1:choice.mode==="choose"
+      ? choice.flavor1
+      : "",
+    flavor2:"",
+    extraPrice:choice.mode==="choose" ? 150 : 0
+  };
+}
+// ===== 悅刻積木拋棄式22000口結束 =====
+
+
+// 只有 c1a / c1b 有贈品
+if(["c1a","c1b"].includes(cp.id)){
   // 只有 c1a / c1b 有贈品
   if(["c1a","c1b"].includes(cp.id)){
 

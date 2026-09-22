@@ -295,10 +295,52 @@ button.secondary{
   border-radius:10px;
   font-size:12px;
 }   
+.new-badge{
+  position:absolute;
+  top:16px;
+  left:16px;
+  z-index:5;
+
+  padding:10px 18px 8px;
+  border-radius:16px;
+
+  background:rgba(255,238,185,.88);
+  border:1px solid rgba(255,255,255,.85);
+
+  box-shadow:
+    0 4px 15px rgba(121,87,18,.20),
+    inset 0 1px 3px rgba(255,255,255,.9);
+
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+
+  text-align:center;
+}
+
+.new-badge-title{
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:2px;
+  color:#382b12;
+  line-height:1.15;
+}
+
+.new-badge-en{
+  margin-top:4px;
+  font-size:8px;
+  letter-spacing:2px;
+  color:#6d5628;
+  white-space:nowrap;
+}
 </style>
 <body><header><div class="brand">RELX & ILIA</div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
 <main class="wrap">
-<section id="shop"><div class="hero-video"><video autoplay muted loop playsinline preload="metadata"><source src="hero.mp4" type="video/mp4"></video><div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
+<section id="shop"><div class="hero-video">
+<div class="new-badge">
+  <div class="new-badge-title">新款上市</div>
+  <div class="new-badge-en">— NEW ARRIVAL —</div>
+</div>   
+<video autoplay muted loop playsinline preload="metadata"><source src="hero.mp4" type="video/mp4"></video><div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
 <section id="cart" class="hidden"><div class="panel"><button class="backBtn" onclick="show('shop')">← 返回購物</button><h2>購物車</h2><div id="rows"></div><p><b>共 <span id="tq">0</span> 件</b></p><button class="purple wide" onclick="goCheckout()">前往填寫取貨資料</button><button class="wide" onclick="show('shop')">繼續購物</button></div></section>
 <section id="checkout" class="hidden"><div class="panel">
 <button type="button" class="secondary" onclick="show('cart')">← 返回購物車</button>

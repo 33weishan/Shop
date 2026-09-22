@@ -360,7 +360,7 @@ const SPECS=[
   // 悅刻積木拋棄式22000口：P6:Q23
  {label:"悅刻積木拋棄式22000口",nameCol:15,stockCol:16,start:5,end:22},
 
- // 積木棒棒糖：S6:T9
+ // 積木主機：S6:T9
  {label:"積木主機",nameCol:18,stockCol:19,start:5,end:8}
 ];
 let groups=[],active=0,cart={},sending=false;
@@ -692,7 +692,7 @@ function giftOptions(cp,cat){
     : "六代主機 1 隻";
 
   const candyGroup =
-    groups.find(g=>g.name==="棒棒糖");
+    groups.find(g=>g.name==="主機");
 
   const sixAllOut =
     cp.id==="c1b" &&
@@ -951,7 +951,7 @@ if(["c5b","c5c","c5d"].includes(cp.id)){
   };
 
   const lollipopGroup=
-    groups.find(g=>g.name==="積木棒棒糖");
+    groups.find(g=>g.name==="積木主機");
 
   const available=lollipopGroup
     ? lollipopGroup.items.filter(p=>Number(p.stock)>0)

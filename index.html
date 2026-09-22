@@ -878,6 +878,7 @@ c
     giftChoice[cat].flavor2=flavor;
   }
 }
+   
 function productPicker(p,cat,isC5){
  let q=draft[p.key]||0;
  return `<div class="card"><div class="name">${esc(p.name)}</div><div class="stock">庫存 ${p.stock}</div><div class="qty"><button onclick="pick('${p.key}',-1,'${cat}',${isC5})">−</button><input type="number" min="0" max="${p.stock}" value="${q}" inputmode="numeric" onchange="pickSet('${p.key}',this.value,'${cat}',${isC5})"><button onclick="pick('${p.key}',1,'${cat}',${isC5})">＋</button></div>${isC5?`<button class="add" style="margin-top:10px" onclick="addC5('${p.key}')">加入購物車</button>`:""}</div>`;

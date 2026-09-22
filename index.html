@@ -446,7 +446,62 @@ function render(){
 
     return;
   }
- 
+ // ===== 悅刻積木拋棄式22000口：單支積木主機 =====
+if(cat==="悅刻積木拋棄式22000口"){
+  let cp=chosenPackage[cat];
+
+  // 還沒選套組時，先走原本畫面
+  if(cp && cp.id==="c5a"){
+    box.style.display="block";
+
+    const lollipopGroup=groups.find(g=>g.name==="積木主機");
+    const items=lollipopGroup?.items||[];
+
+    box.innerHTML=`
+      <div class="panel package-panel">
+        <h2>選擇套組</h2>
+
+        <select onchange="choosePack('${cat}',this.value)">
+          <option value="">請先選擇套組</option>
+
+          ${(PACKAGES[cat]||[]).map(p=>`
+            <option value="${p.id}" ${cp.id===p.id?"selected":""}>
+              ${p.label}－$${p.price}
+            </option>
+          `).join("")}
+        </select>
+
+        <div class="result">
+          <b>${cp.label}｜$${cp.price}</b>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:14px">
+        <h2>選擇積木主機口味</h2>
+
+        <div class="grid">
+          ${items.map(p=>`
+            <div class="card">
+              <div class="name">${esc(p.name)}</div>
+              <div class="stock">庫存 ${p.stock}</div>
+
+              <button
+                class="add"
+                style="margin-top:10px"
+                ${Number(p.stock)<=0?"disabled":""}
+                onclick="addC5Lollipop('${p.key}')">
+                ${Number(p.stock)>0?"加入購物車":"已售完"}
+              </button>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+
+    return;
+  }
+}
+// ===== 悅刻積木拋棄式22000口 c5a 結束 =====
   box.style.display="block";
 
   let packs=PACKAGES[cat]||[],
@@ -696,6 +751,39 @@ function setGiftFlavor(cat,index,flavor){
     giftChoice[cat].flavor2=flavor;
   }
 }  
+   function addC5Lollipop(key){
+  const p=find(key);
+
+  if(!p){
+    return alert("找不到積木主機資料");
+  }
+
+  if(Number(p.stock)<=0){
+    return alert("這個口味目前沒有庫存");
+  }
+
+  const bundleKey=
+    "B-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
+
+  cart[bundleKey]={
+    bundle:true,
+    category:"悅刻積木拋棄式22000口",
+    packageId:"c5a",
+    packageLabel:"單支積木主機",
+    price:250,
+    target:1,
+    items:[
+      {
+        key:p.key,
+        qty:1
+      }
+    ],
+    gift:null
+  };
+
+  count();
+  showCart();
+}
 function productPicker(p,cat,isC5){
  let q=draft[p.key]||0;
  return `<div class="card"><div class="name">${esc(p.name)}</div><div class="stock">庫存 ${p.stock}</div><div class="qty"><button onclick="pick('${p.key}',-1,'${cat}',${isC5})">−</button><input type="number" min="0" max="${p.stock}" value="${q}" inputmode="numeric" onchange="pickSet('${p.key}',this.value,'${cat}',${isC5})"><button onclick="pick('${p.key}',1,'${cat}',${isC5})">＋</button></div>${isC5?`<button class="add" style="margin-top:10px" onclick="addC5('${p.key}')">加入購物車</button>`:""}</div>`;

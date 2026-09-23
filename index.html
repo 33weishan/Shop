@@ -474,15 +474,10 @@ let giftChoice={};
 function csv(t){let a=[],r=[],c="",q=false;for(let i=0;i<t.length;i++){let x=t[i],n=t[i+1];if(x=='"'&&q&&n=='"'){c+='"';i++}else if(x=='"')q=!q;else if(x==','&&!q){r.push(c);c=""}else if((x=='\n'||x=='\r')&&!q){if(x=='\r'&&n=='\n')i++;r.push(c);c="";a.push(r);r=[]}else c+=x}if(c||r.length){r.push(c);a.push(r)}return a}
 async function load(){try{
 
- // 銷售設定與庫存同時讀取，加快專屬入口
- const sellerPromise = loadSellerConfig();
- const stockPromise = fetch(CSV+"&_="+Date.now(),{cache:"no-store"});
+ // 如果是銷售專屬網址，先讀取銷售設定
+ await loadSellerConfig();
 
- const z = await stockPromise;
- const all = csv(await z.text());
-
- await sellerPromise;
-
+ let z=await fetch(CSV+"&_="+Date.now(),{cache:"no-store"}),all=csv(await z.text());
  groups=SPECS.map((s,g)=>{
    if(!s.custom) return {
      name:s.label,

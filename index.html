@@ -524,7 +524,7 @@ if(cat==="悅刻積木拋棄式22000口"){
       </div>
 
       <div class="panel" style="margin-top:14px">
-        <h2>選擇積木主機口味</h2>
+        <h2>選擇積木主機顏色</h2>
 
         <div class="grid">
           ${items.map(p=>`
@@ -693,10 +693,8 @@ function giftOptions(cp,cat){
           ? `
             <div style="margin-top:10px">
 
-              <b>指定口味：</b>
-
               <select onchange="setGiftFlavor('${cat}',1,this.value)">
-                <option value="">請選擇口味</option>
+                <option value="">請選擇顏色</option>
 
                 ${actualFlavors.map(p=>`
                   <option

@@ -409,9 +409,7 @@ let groups=[],active=0,cart={},sending=false;
 const sellerCode = new URLSearchParams(window.location.search).get("seller") || "";
 let sellerConfig = null;
 
-result.classList.remove('hidden');
-  bossPrice.value = '';
-}
+async function loadSellerConfig(){
    
 const CSV="https://docs.google.com/spreadsheets/d/1I1i9bTTNYsNlg8qkSi9VLOmci-IplxfBANU-cEJDFoc/export?format=csv&gid=121866907";
 const API="https://script.google.com/macros/s/AKfycbxyJSU-_4X3gOCRvfEoEhe2ETWkQjXBcHCTIco4BubYDziINuOYCwLPaCvvzTrimUDU/exec";

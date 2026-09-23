@@ -405,6 +405,32 @@ const SPECS=[
 ];
 let groups=[],active=0,cart={},sending=false;
 
+   // ===== 銷售專屬入口 =====
+const sellerCode = new URLSearchParams(window.location.search).get("seller") || "";
+let sellerConfig = null;
+
+async function loadSellerConfig(){
+  if(!sellerCode) return;
+
+  try{
+    const res = await fetch(
+      API + "?seller=" + encodeURIComponent(sellerCode) + "&_=" + Date.now(),
+      {cache:"no-store"}
+    );
+
+    const data = await res.json();
+
+    if(data && data.ok){
+      sellerConfig = data;
+    }else{
+      sellerConfig = null;
+    }
+  }catch(err){
+    console.error("讀取銷售資料失敗",err);
+    sellerConfig = null;
+  }
+}
+   
 try{
   cart=JSON.parse(localStorage.getItem("shop_cart")||"{}");
 }catch(e){
@@ -451,15 +477,80 @@ let giftChoice={};
    
 function csv(t){let a=[],r=[],c="",q=false;for(let i=0;i<t.length;i++){let x=t[i],n=t[i+1];if(x=='"'&&q&&n=='"'){c+='"';i++}else if(x=='"')q=!q;else if(x==','&&!q){r.push(c);c=""}else if((x=='\n'||x=='\r')&&!q){if(x=='\r'&&n=='\n')i++;r.push(c);c="";a.push(r);r=[]}else c+=x}if(c||r.length){r.push(c);a.push(r)}return a}
 async function load(){try{
+
+ // 如果是銷售專屬網址，先讀取銷售設定
+ await loadSellerConfig();
+
  let z=await fetch(CSV+"&_="+Date.now(),{cache:"no-store"}),all=csv(await z.text());
+
  groups=SPECS.map((s,g)=>{
-   if(!s.custom) return {name:s.label,items:all.slice(s.start,s.end+1).filter(r=>(r[s.nameCol]||"").trim()).map((r,i)=>({key:g+"-"+i,name:(r[s.nameCol]||"").trim(),stock:Math.max(0,parseInt(r[s.stockCol])||0)}))};
-   let five=all.slice(5,13).filter(r=>(r[3]||"").trim()).map((r,i)=>({key:g+"-five-"+i,name:(r[3]||"").trim(),stock:Math.max(0,parseInt(r[4])||0),sub:"五代主機",price:800}));
-   let six=all.slice(22,28).filter(r=>(r[3]||"").trim()).map((r,i)=>({key:g+"-six-"+i,name:(r[3]||"").trim(),stock:Math.max(0,parseInt(r[4])||0),sub:"六代主機",price:1200}));
+   if(!s.custom) return {
+     name:s.label,
+     items:all.slice(s.start,s.end+1)
+       .filter(r=>(r[s.nameCol]||"").trim())
+       .map((r,i)=>({
+         key:g+"-"+i,
+         name:(r[s.nameCol]||"").trim(),
+         stock:Math.max(0,parseInt(r[s.stockCol])||0)
+       }))
+   };
+
+   let five=all.slice(5,13)
+     .filter(r=>(r[3]||"").trim())
+     .map((r,i)=>({
+       key:g+"-five-"+i,
+       name:(r[3]||"").trim(),
+       stock:Math.max(0,parseInt(r[4])||0),
+       sub:"五代主機",
+       price:800
+     }));
+
+   let six=all.slice(22,28)
+     .filter(r=>(r[3]||"").trim())
+     .map((r,i)=>({
+       key:g+"-six-"+i,
+       name:(r[3]||"").trim(),
+       stock:Math.max(0,parseInt(r[4])||0),
+       sub:"六代主機",
+       price:1200
+     }));
+
    return {name:"主機",items:[...five,...six]};
  });
- document.getElementById("sync").textContent="✓ 庫存已更新";renderTabs();ensureCandyTitle();render()
-}catch(e){document.getElementById("sync").textContent="庫存同步失敗"}}
+
+ // ===== 銷售專屬入口：限制可看到的分類 =====
+ if(sellerCode){
+
+  // 有 seller 網址，但銷售不存在／被停用
+  if(!sellerConfig || !sellerConfig.ok){
+    groups=[];
+    document.getElementById("sync").textContent="此銷售連結目前無法使用";
+    document.getElementById("tabs").innerHTML="";
+    document.getElementById("products").innerHTML=
+      `<div style="padding:40px 20px;text-align:center">
+        此銷售連結目前無法使用
+      </div>`;
+    return;
+  }
+
+  // 有效銷售：只保留允許販售的分類
+  groups=groups.filter(g=>
+    g.name===sellerConfig.category ||
+    g.name==="積木主機"
+  );
+
+  active=0;
+}
+   
+ document.getElementById("sync").textContent="✓ 庫存已更新";
+ renderTabs();
+ ensureCandyTitle();
+ render();
+
+}catch(e){
+ console.error(e);
+ document.getElementById("sync").textContent="庫存同步失敗";
+}}
    function renderTabs(){
   document.getElementById("tabs").innerHTML=groups.map((g,i)=>{
     if(g.name==="積木主機") return "";
@@ -1377,7 +1468,8 @@ try{await postNoCors({
   storeName,
   contactAccount,
   feedback,
-  agentCode
+  agentCode,
+  sellerCode:sellerCode
 },
   items,
 orderMeta

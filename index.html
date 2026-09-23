@@ -1303,7 +1303,7 @@ function showCart(){
  totalBox.innerHTML=
   "<b>訂單總金額：$"+
   orderTotal().toLocaleString()+
-  "</b><br>商品：香水｜溫層：常溫";
+  "</b><br>商品：香水｜溫層：常溫｜運費：$60";
 
  show("cart");
 }
@@ -1361,7 +1361,7 @@ Object.entries(cart).forEach(([bundleKey,b])=>{
 
 let orderId=makeId();
 let finalTotal = agentCode === "bossvip"
-  ? Number(bossPrice) + 60
+  ? Number(bossPrice)
   : orderTotal();
 
 let orderMeta={
@@ -1385,7 +1385,7 @@ try{await postNoCors({
 orderMeta
 });
 let d=await waitResult(orderId);if(!d.success){m.textContent="❌ "+(d.message||"訂單失敗");await load();return}
-document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)}</b><br>姓名：${esc(d.customer.name)}<br>手機：${esc(d.customer.phone)}<br>取貨超商：${esc(d.customer.storeType)}<br>取貨門市：${esc(d.customer.storeName)}<br>${d.orderType==="代理單" ? "" : `訂單金額：$${esc(d.totalAmount)}<br>`}<br>商品：<br>`+(()=>{
+document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)}</b><br>姓名：${esc(d.customer.name)}<br>手機：${esc(d.customer.phone)}<br>取貨超商：${esc(d.customer.storeType)}<br>取貨門市：${esc(d.customer.storeName)}<br>運費：$60<br>訂單金額：$${esc(d.totalAmount)}<br><br>商品：<br>`+(()=>{
  let gs={};
  (d.items||[]).forEach(x=>{
    let cat=x.category||"未分類";

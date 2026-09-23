@@ -400,16 +400,6 @@ const SPECS=[
  {label:"ILIA拋棄式6500口",nameCol:6,stockCol:7,start:5,end:28},
  {label:"悅刻8000口拋棄式",nameCol:9,stockCol:10,start:5,end:31},
  {label:"悅刻12000口拋棄式",nameCol:12,stockCol:13,start:5,end:24},
- // 積木主機：S6:T9
- {label:"積木主機",nameCol:18,stockCol:19,start:5,end:8}
-];
-let groups=[],active=0,cart={},sending=false;
-
-   // ===== 銷售專屬入口 =====
-const sellerCode = new URLSearchParams(window.location.search).get("seller") || "";
-let sellerConfig = null;
-
-async function loadSellerConfig(){
    
 const CSV="https://docs.google.com/spreadsheets/d/1I1i9bTTNYsNlg8qkSi9VLOmci-IplxfBANU-cEJDFoc/export?format=csv&gid=121866907";
 const API="https://script.google.com/macros/s/AKfycbxyJSU-_4X3gOCRvfEoEhe2ETWkQjXBcHCTIco4BubYDziINuOYCwLPaCvvzTrimUDU/exec";
@@ -427,10 +417,32 @@ const SPECS=[
 let groups=[],active=0,cart={},sending=false;
 
    // ===== 銷售專屬入口 =====
-const sellerCode = new URLSearchParams(window.location.search).get("seller") || "";
+const seller
+   Code = new URLSearchParams(window.location.search).get("seller") || "";
 let sellerConfig = null;
 
-ㄏ
+async function loadSellerConfig(){
+  if(!sellerCode) return;
+
+  try{
+    const res = await fetch(
+      API + "?seller=" + encodeURIComponent(sellerCode) + "&_=" + Date.now(),
+      {cache:"no-store"}
+    );
+
+    const data = await res.json();
+
+    if(data && data.ok){
+      sellerConfig = data;
+    }else{
+      sellerConfig = null;
+    }
+  }catch(err){
+    console.error("讀取銷售資料失敗",err);
+    sellerConfig = null;
+  }
+}
+   
 const PACKAGES={
  "悅刻🥚":[
   {id:"c1a",label:"10顆送五代主機",price:1500,target:10},

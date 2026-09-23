@@ -409,34 +409,30 @@ let groups=[],active=0,cart={},sending=false;
 const sellerCode = new URLSearchParams(window.location.search).get("seller") || "";
 let sellerConfig = null;
 
-async function loadSellerConfig(){
-  if(!sellerCode) return;
-
-  try{
-    const res = await fetch(
-      API + "?seller=" + encodeURIComponent(sellerCode) + "&_=" + Date.now(),
-      {cache:"no-store"}
-    );
-
-    const data = await res.json();
-
-    if(data && data.ok){
-      sellerConfig = data;
-    }else{
-      sellerConfig = null;
-    }
-  }catch(err){
-    console.error("讀取銷售資料失敗",err);
-    sellerConfig = null;
-  }
+ㄏ  result.classList.remove('hidden');
+  bossPrice.value = '';
 }
    
-try{
-  cart=JSON.parse(localStorage.getItem("shop_cart")||"{}");
-}catch(e){
-  cart={};
-}
+const CSV="https://docs.google.com/spreadsheets/d/1I1i9bTTNYsNlg8qkSi9VLOmci-IplxfBANU-cEJDFoc/export?format=csv&gid=121866907";
+const API="https://script.google.com/macros/s/AKfycbxyJSU-_4X3gOCRvfEoEhe2ETWkQjXBcHCTIco4BubYDziINuOYCwLPaCvvzTrimUDU/exec";
+const SPECS=[
+   // 悅刻積木拋棄式22000口：P6:Q23
+ {label:"悅刻積木拋棄式22000口",nameCol:15,stockCol:16,start:5,end:22},
+ {label:"悅刻🥚",nameCol:0,stockCol:1,start:5,end:38},
+ {label:"主機",custom:true},
+ {label:"ILIA拋棄式6500口",nameCol:6,stockCol:7,start:5,end:28},
+ {label:"悅刻8000口拋棄式",nameCol:9,stockCol:10,start:5,end:31},
+ {label:"悅刻12000口拋棄式",nameCol:12,stockCol:13,start:5,end:24},
+ // 積木主機：S6:T9
+ {label:"積木主機",nameCol:18,stockCol:19,start:5,end:8}
+];
+let groups=[],active=0,cart={},sending=false;
 
+   // ===== 銷售專屬入口 =====
+const sellerCode = new URLSearchParams(window.location.search).get("seller") || "";
+let sellerConfig = null;
+
+ㄏ
 const PACKAGES={
  "悅刻🥚":[
   {id:"c1a",label:"10顆送五代主機",price:1500,target:10},
@@ -478,10 +474,14 @@ let giftChoice={};
 function csv(t){let a=[],r=[],c="",q=false;for(let i=0;i<t.length;i++){let x=t[i],n=t[i+1];if(x=='"'&&q&&n=='"'){c+='"';i++}else if(x=='"')q=!q;else if(x==','&&!q){r.push(c);c=""}else if((x=='\n'||x=='\r')&&!q){if(x=='\r'&&n=='\n')i++;r.push(c);c="";a.push(r);r=[]}else c+=x}if(c||r.length){r.push(c);a.push(r)}return a}
 async function load(){try{
 
- // 如果是銷售專屬網址，先讀取銷售設定
- await loadSellerConfig();
+ // 銷售設定與庫存同時讀取，加快專屬入口
+ const sellerPromise = loadSellerConfig();
+ const stockPromise = fetch(CSV+"&_="+Date.now(),{cache:"no-store"});
 
- let z=await fetch(CSV+"&_="+Date.now(),{cache:"no-store"}),all=csv(await z.text());
+ const z = await stockPromise;
+ const all = csv(await z.text());
+
+ await sellerPromise;
 
  groups=SPECS.map((s,g)=>{
    if(!s.custom) return {

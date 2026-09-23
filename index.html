@@ -1167,7 +1167,7 @@ function addC5(k){let q=draft[k]||0,p=find(k);if(q<=0)return alert("請先選擇
 function find(k){for(let g of groups){let p=g.items.find(x=>x.key===k);if(p)return p}}
 function add(k){let p=find(k),q=cart[k]||0;if(q<p.stock)cart[k]=q+1;count()}
 function orderTotal(){
-  return Object.values(cart).reduce((s,b)=>{
+  const productTotal=Object.values(cart).reduce((s,b)=>{
     const basePrice=
       b.category==="主機"
         ? Number(b.price||0)*Number(b.target||0)
@@ -1178,6 +1178,8 @@ function orderTotal(){
 
     return s+basePrice+giftExtra;
   },0);
+
+  return productTotal + 60;
 }
 function count(){
   document.getElementById("cc").textContent=
@@ -1359,7 +1361,7 @@ Object.entries(cart).forEach(([bundleKey,b])=>{
 
 let orderId=makeId();
 let finalTotal = agentCode === "bossvip"
-  ? Number(bossPrice)
+  ? Number(bossPrice) + 60
   : orderTotal();
 
 let orderMeta={

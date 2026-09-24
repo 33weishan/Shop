@@ -414,7 +414,7 @@ async function loadSellerConfig(){
 
   try{
     const res = await fetch(
-      API + "?seller=" + encodeURIComponent(sellerCode) + "&_=" + Date.now(),
+      API + "?seller=" + encodeURIComponent(sellerCode) + "&_=" + Date.now(),cccc
       {cache:"no-store"}
     );
 
@@ -528,9 +528,9 @@ async function load(){try{
 
   // 有效銷售：只保留允許販售的分類
   groups=groups.filter(g=>
-    g.name===sellerConfig.category ||
-    g.name==="積木主機"
-  );
+  sellerConfig.categories.includes(g.name) ||
+  g.name==="積木主機"
+);
 
   active=0;
 }
@@ -555,7 +555,7 @@ function ensureCandyTitle(){
 }  
 function render(){
   let g=groups[active],
-      cat=SPECS[active].label,
+      cat=g.name,
       box=document.getElementById("products");
 
   if(cat==="主機"){

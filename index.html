@@ -414,7 +414,7 @@ async function loadSellerConfig(){
 
   try{
     const res = await fetch(
-      API + "?seller=" + encodeURIComponent(sellerCode) + "&_=" + Date.now(),cccc
+      API + "?seller=" + encodeURIComponent(sellerCode) + "&_=" + Date.now(),
       {cache:"no-store"}
     );
 

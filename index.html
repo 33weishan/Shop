@@ -597,6 +597,10 @@ const SPECS=[
 ];
 let groups=[],active=0,cart={},sending=false;
 
+   let shopMode = "normal";
+let loggedAgentConfig = null;
+let agentBatchOrders = [];
+   
    // ===== 銷售專屬入口 =====
 const sellerCode = new URLSearchParams(window.location.search).get("seller") || "";
 let sellerConfig = null;

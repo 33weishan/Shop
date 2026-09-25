@@ -1440,8 +1440,43 @@ function choosePack(cat,id){
   render();
 }
 function draftTotal(cat){let gi=SPECS.findIndex(x=>x.label===cat);return Object.entries(draft).filter(([k])=>k.startsWith(gi+"-")).reduce((s,[,q])=>s+q,0)}
-function pick(k,d,cat,isC5){let p=find(k),n=Math.max(0,(draft[k]||0)+d);if(!isC5){let cp=chosenPackage[cat],other=draftTotal(cat)-(draft[k]||0);n=Math.min(n,Math.max(0,cp.target-other))}draft[k]=Math.min(n,p.stock);render()}
-function pickSet(k,v,cat,isC5){let p=find(k),n=Math.max(0,parseInt(v,10)||0);if(!isC5){let cp=chosenPackage[cat],other=draftTotal(cat)-(draft[k]||0);n=Math.min(n,Math.max(0,cp.target-other))}draft[k]=Math.min(n,p.stock);render()}
+function pick(k,d,cat,isC5){
+  let p=find(k);
+  let n=Math.max(0,(draft[k]||0)+d);
+
+  // 一般購買才限制套組數量
+  // 代理模式是單顆／單支，不受套組限制
+  if(shopMode !== "agent" && !isC5){
+    let cp=chosenPackage[cat];
+
+    if(cp){
+      let other=draftTotal(cat)-(draft[k]||0);
+      n=Math.min(n,Math.max(0,cp.target-other));
+    }
+  }
+
+  draft[k]=Math.min(n,p.stock);
+  render();
+}
+
+function pickSet(k,v,cat,isC5){
+  let p=find(k);
+  let n=Math.max(0,parseInt(v,10)||0);
+
+  // 一般購買才限制套組數量
+  // 代理模式是單顆／單支，不受套組限制
+  if(shopMode !== "agent" && !isC5){
+    let cp=chosenPackage[cat];
+
+    if(cp){
+      let other=draftTotal(cat)-(draft[k]||0);
+      n=Math.min(n,Math.max(0,cp.target-other));
+    }
+  }
+
+  draft[k]=Math.min(n,p.stock);
+  render();
+}
 function addPackage(cat){
   let cp=chosenPackage[cat];
   if(!cp)return;

@@ -685,57 +685,90 @@ async function loadSellerConfig(){
     sellerConfig = null;
   }
 }
-  function loadAgentConfig(agentCode){
+ function loadAgentConfig(agentCode){
 
-  const code=String(agentCode||"")
+  const code = String(agentCode || "")
     .trim()
     .toLowerCase();
 
-  if(!code || code==="bossvip"){
+  if(!code || code === "bossvip"){
     return Promise.resolve(null);
   }
 
   return new Promise((resolve)=>{
 
-    const cb=
-      "agent_"+Date.now()+"_"+
-      Math.random().toString(36).slice(2,7);
+    const cb =
+      "agentCallback_" +
+      Date.now() +
+      "_" +
+      Math.random().toString(36).slice(2,8);
 
-    const script=document.createElement("script");
+    const script = document.createElement("script");
 
-    let timer;
+    let finished = false;
 
-    window[cb]=data=>{
-      cleanup();
+    const cleanup = ()=>{
+      if(finished) return;
+      finished = true;
 
-      if(data && data.success){
+      clearTimeout(timer);
+
+      try{
+        delete window[cb];
+      }catch(e){
+        window[cb] = undefined;
+      }
+
+      if(script.parentNode){
+        script.parentNode.removeChild(script);
+      }
+    };
+
+    window[cb] = function(data){
+
+      console.log("代理驗證回傳：", data);
+
+      if(data && data.success === true){
+
+        // 保險：確保代理碼一定存在
+        if(!data.agentCode){
+          data.agentCode = code;
+        }
+
+        cleanup();
         resolve(data);
+
       }else{
+
+        console.error("代理驗證失敗：", data);
+
+        cleanup();
         resolve(null);
       }
     };
 
-    function cleanup(){
-      clearTimeout(timer);
-      delete window[cb];
-      script.remove();
-    }
+    script.onerror = function(){
 
-    script.onerror=()=>{
+      console.error("代理驗證 JSONP 載入失敗");
+
       cleanup();
       resolve(null);
     };
 
-    timer=setTimeout(()=>{
+    const timer = setTimeout(function(){
+
+      console.error("代理驗證逾時");
+
       cleanup();
       resolve(null);
-    },8000);
 
-    script.src=
-      API+
-      "?agent="+encodeURIComponent(code)+
-      "&callback="+encodeURIComponent(cb)+
-      "&_="+Date.now();
+    },10000);
+
+    script.src =
+      API +
+      "?agent=" + encodeURIComponent(code) +
+      "&callback=" + encodeURIComponent(cb) +
+      "&_=" + Date.now();
 
     document.body.appendChild(script);
   });

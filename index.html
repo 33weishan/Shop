@@ -383,6 +383,21 @@ button.secondary{
 </section>
 
 <section id="shop" class="hidden">
+<button
+  type="button"
+  onclick="backToEntry()"
+  style="
+    margin-bottom:16px;
+    padding:10px 18px;
+    border:1px solid #ddd;
+    border-radius:12px;
+    background:#fff;
+    font-size:15px;
+    cursor:pointer;
+  "
+>
+  ← 返回選擇購買方式
+</button>   
 <div class="hero-video">  
 <div class="new-title">新款上市</div>
 <video autoplay muted loop playsinline preload="metadata"><source src="hero.mp4" type="video/mp4"></video><div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
@@ -726,6 +741,33 @@ async function loadSellerConfig(){
   });
 }
 
+function backToEntry(){
+  // 回到入口
+  document.getElementById("shop")?.classList.add("hidden");
+  document.getElementById("entry")?.classList.remove("hidden");
+
+  // 關閉代理碼輸入區
+  document.getElementById("agentEntryBox")?.classList.add("hidden");
+
+  // 清除這次進入模式
+  shopMode = "normal";
+  loggedAgentConfig = null;
+
+  const result = document.getElementById("entryAgentResult");
+  const input = document.getElementById("entryAgentCode");
+
+  if(result){
+    result.textContent = "";
+    result.classList.add("hidden");
+  }
+
+  if(input){
+    input.value = "";
+  }
+
+  render();
+}
+   
 function enterNormalShop(){
   shopMode = "normal";
   loggedAgentConfig = null;

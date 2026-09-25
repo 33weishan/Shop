@@ -315,21 +315,50 @@ button.secondary{
   <div class="panel">
     <h2 style="text-align:center;">歡迎進入賣場</h2>
 
-    <button
-      type="button"
-      class="purple wide"
-      onclick="enterNormalShop()"
-    >
-      一般購買
-    </button>
+    <div style="
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  margin-top:30px;
+">
 
-    <button
-      type="button"
-      class="wide"
-      onclick="showAgentEntry()"
-    >
-      我是代理
-    </button>
+  <button
+    type="button"
+    onclick="enterNormalShop()"
+    style="
+      width:220px;
+      height:90px;
+      border:0;
+      border-radius:22px;
+      background:#111;
+      color:#fff;
+      font-size:24px;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    一般購買
+  </button>
+
+  <button
+    type="button"
+    onclick="showAgentEntry()"
+    style="
+      width:220px;
+      height:90px;
+      border:2px solid #111;
+      border-radius:22px;
+      background:#fff;
+      color:#111;
+      font-size:24px;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    我是代理
+  </button>
+
+</div>
 
     <div id="agentEntryBox" class="hidden" style="margin-top:18px;">
       <label>代理碼</label>

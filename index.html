@@ -623,6 +623,10 @@ async function loadSellerConfig(){
   }
 }
 
+   let shopMode = "normal";
+let loggedAgentConfig = null;
+let agentBatchOrders = [];
+   
   function loadAgentConfig(agentCode){
 
   const code=String(agentCode||"")

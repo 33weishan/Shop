@@ -686,12 +686,12 @@ function enterNormalShop(){
   shopMode = "normal";
   loggedAgentConfig = null;
 
-  document.getElementById("entryAgentBox")?.classList.add("hidden");
-  show("shop");
+  document.getElementById("entry")?.classList.add("hidden");
+  document.getElementById("shop")?.classList.remove("hidden");
 }
 
 function showAgentEntry(){
-  const box = document.getElementById("entryAgentBox");
+  const box = document.getElementById("agentEntryBox");
   const input = document.getElementById("entryAgentCode");
   const result = document.getElementById("entryAgentResult");
 
@@ -705,7 +705,6 @@ function showAgentEntry(){
     input.focus();
   }
 }
-   
 async function enterAgentShop(){
   const input = document.getElementById("entryAgentCode");
   const result = document.getElementById("entryAgentResult");

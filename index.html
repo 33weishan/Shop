@@ -310,57 +310,15 @@ button.secondary{
 <body><header><div class="brand">RELX & ILIA</div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
 <main class="wrap">
 
-<!-- ===== 賣場入口 ===== -->
-<section id="entry">
+<!-- ===== 代理專屬入口 ===== -->
+<section id="entry" class="hidden">
   <div class="panel">
-    <h2 style="text-align:center;">歡迎進入賣場</h2>
 
-    <div style="
-  display:flex;
-  justify-content:center;
-  gap:18px;
-  margin-top:30px;
-">
+    <h2 style="text-align:center;">
+      代理登入
+    </h2>
 
-  <button
-    type="button"
-    onclick="enterNormalShop()"
-    style="
-      width:220px;
-      height:90px;
-      border:0;
-      border-radius:22px;
-      background:#111;
-      color:#fff;
-      font-size:24px;
-      font-weight:700;
-      cursor:pointer;
-    "
-  >
-    一般購買
-  </button>
-
-  <button
-    type="button"
-    onclick="showAgentEntry()"
-    style="
-      width:220px;
-      height:90px;
-      border:2px solid #111;
-      border-radius:22px;
-      background:#fff;
-      color:#111;
-      font-size:24px;
-      font-weight:700;
-      cursor:pointer;
-    "
-  >
-    我是代理
-  </button>
-
-</div>
-
-    <div id="agentEntryBox" class="hidden" style="margin-top:18px;">
+    <div id="agentEntryBox">
       <label>代理碼</label>
 
       <input
@@ -369,7 +327,10 @@ button.secondary{
         autocomplete="off"
       >
 
-      <div id="entryAgentResult" class="result hidden"></div>
+      <div
+        id="entryAgentResult"
+        class="result hidden">
+      </div>
 
       <button
         type="button"
@@ -379,6 +340,7 @@ button.secondary{
         驗證並進入賣場
       </button>
     </div>
+
   </div>
 </section>
 
@@ -659,6 +621,37 @@ let groups=[],active=0,cart={},sending=false;
    let shopMode = "normal";
 let loggedAgentConfig = null;
 let agentBatchOrders = [];
+
+   // ===== 自動判斷一般入口 / 代理專屬入口 =====
+document.addEventListener("DOMContentLoaded", function(){
+
+  const params = new URLSearchParams(window.location.search);
+  const isAgentEntry = params.get("agent") === "1";
+
+  if(isAgentEntry){
+
+    // 代理專屬網址：顯示代理登入
+    shopMode = "agent";
+
+    const entry = document.getElementById("entry");
+    if(entry){
+      entry.classList.remove("hidden");
+    }
+
+  }else{
+
+    // 一般網址：直接進入正常商城
+    shopMode = "normal";
+
+    const entry = document.getElementById("entry");
+    if(entry){
+      entry.classList.add("hidden");
+    }
+
+    enterNormalShop();
+  }
+
+});
    
    // ===== 銷售專屬入口 =====
 const sellerCode = new URLSearchParams(window.location.search).get("seller") || "";

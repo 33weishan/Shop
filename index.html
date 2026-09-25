@@ -682,6 +682,30 @@ async function loadSellerConfig(){
   });
 }
 
+function enterNormalShop(){
+  shopMode = "normal";
+  loggedAgentConfig = null;
+
+  document.getElementById("entryAgentBox")?.classList.add("hidden");
+  show("shop");
+}
+
+function showAgentEntry(){
+  const box = document.getElementById("entryAgentBox");
+  const input = document.getElementById("entryAgentCode");
+  const result = document.getElementById("entryAgentResult");
+
+  box?.classList.remove("hidden");
+
+  if(result){
+    result.textContent = "";
+  }
+
+  if(input){
+    input.focus();
+  }
+}
+   
 async function enterAgentShop(){
   const input = document.getElementById("entryAgentCode");
   const result = document.getElementById("entryAgentResult");

@@ -623,51 +623,60 @@ async function loadSellerConfig(){
   }
 }
 
-   async function loadAgentConfig(agentCode){
-  const code = String(agentCode || "").trim().toLowerCase();
+  function loadAgentConfig(agentCode){
 
-  if(!code || code === "bossvip"){
-    return null;
+  const code=String(agentCode||"")
+    .trim()
+    .toLowerCase();
+
+  if(!code || code==="bossvip"){
+    return Promise.resolve(null);
   }
 
-  try{
-    const res = await fetch(
-      API + "?agent=" + encodeURIComponent(code) + "&_=" + Date.now(),
-      {cache:"no-store"}
-    );
+  return new Promise((resolve)=>{
 
-    const data = await res.json();
+    const cb=
+      "agent_"+Date.now()+"_"+
+      Math.random().toString(36).slice(2,7);
 
-    if(data && data.success){
-      return data;
+    const script=document.createElement("script");
+
+    let timer;
+
+    window[cb]=data=>{
+      cleanup();
+
+      if(data && data.success){
+        resolve(data);
+      }else{
+        resolve(null);
+      }
+    };
+
+    function cleanup(){
+      clearTimeout(timer);
+      delete window[cb];
+      script.remove();
     }
 
-    return null;
+    script.onerror=()=>{
+      cleanup();
+      resolve(null);
+    };
 
-  }catch(err){
-    console.error("讀取代理資料失敗",err);
-    return null;
-  }
-}
-   let shopMode = "normal";
-let loggedAgentConfig = null;
-let agentBatchOrders = [];
+    timer=setTimeout(()=>{
+      cleanup();
+      resolve(null);
+    },8000);
 
-function enterNormalShop(){
-  shopMode = "normal";
-  loggedAgentConfig = null;
+    script.src=
+      API+
+      "?agent="+encodeURIComponent(code)+
+      "&callback="+encodeURIComponent(cb)+
+      "&_="+Date.now();
 
-  document.getElementById("entry").classList.add("hidden");
-  document.getElementById("shop").classList.remove("hidden");
-}
-
-function showAgentEntry(){
-  const box = document.getElementById("agentEntryBox");
-  box.classList.remove("hidden");
-
-  setTimeout(() => {
-    document.getElementById("entryAgentCode").focus();
-  }, 50);
+    document.body.appendChild(script);
+  });
 }
 
 async function enterAgentShop(){

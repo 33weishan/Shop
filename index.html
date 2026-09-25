@@ -2318,29 +2318,35 @@ async function uploadAgentProof(){
   // 等待 Apps Script 完成 Drive 上傳
   for(let i=0;i<15;i++){
 
-    try{
+  let result=null;
 
-      const result=
-        await checkAgentProofUpload(uploadId);
+  try{
+    result=await checkAgentProofUpload(uploadId);
+  }catch(err){
+    // 單純查詢失敗，繼續下一次查詢
+  }
 
-      if(
-        result &&
-        result.success &&
-        result.status==="completed" &&
-        result.url
-      ){
-        return result.url;
-      }
-
-    }catch(err){
-      // 暫時查不到就繼續等
-    }
-
-    await new Promise(
-      resolve=>setTimeout(resolve,1000)
+  // 後端已經明確回報上傳失敗
+  if(result && result.status==="failed"){
+    throw new Error(
+      result.message || "轉帳證明上傳失敗"
     );
   }
 
+  // 上傳成功
+  if(
+    result &&
+    result.success &&
+    result.status==="completed" &&
+    result.url
+  ){
+    return result.url;
+  }
+
+  await new Promise(
+    resolve=>setTimeout(resolve,1000)
+  );
+}
   throw new Error(
     "轉帳證明已送出，但暫時無法確認上傳結果，請勿重複送出"
   );

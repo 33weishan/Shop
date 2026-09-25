@@ -2717,7 +2717,12 @@ if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");
 if(!contactAccount)return alert("請輸入LINE ID / IG帳號");
 if(agentCode==="bossvip"){
   const price=Number(bossPrice);
-  if(!bossPrice || !Number.isFinite(price) || price<=0){
+
+  if(
+    String(bossPrice).trim()==="" ||
+    !Number.isFinite(price) ||
+    price<0
+  ){
     return alert("請輸入老闆給你的優惠價");
   }
 }

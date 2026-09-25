@@ -2382,7 +2382,6 @@ async function submitAgentBatch(){
     return alert("請上傳轉帳證明");
   }
 
-
   const btn =
     document.getElementById("agentBatchSubmitBtn");
 
@@ -2401,9 +2400,54 @@ async function submitAgentBatch(){
     const proofUrl =
       await uploadAgentProof();
 
+    // ===== 逐筆真正送進後端 =====
+    for(let i = 0; i < agentBatchOrders.length; i++){
 
-    // ===== 整批全部成功 =====
+      const order = agentBatchOrders[i];
 
+      status.textContent =
+        "正在送出第 " +
+        (i + 1) +
+        " / " +
+        agentBatchOrders.length +
+        " 筆訂單…";
+
+      const payload = {
+        orderId: order.orderId,
+
+        customer: {
+          ...order.customer,
+
+          // 本批共用付款資料
+          transferProof: proofUrl,
+          transferLast5: transferLast5
+        },
+
+        items: order.items,
+
+        orderMeta: {
+          agentAmount: Number(order.agentAmount || 0)
+        }
+      };
+
+      await postNoCors(payload);
+
+      const result =
+        await waitResult(order.orderId);
+
+      if(
+        !result ||
+        result.status !== "completed"
+      ){
+        throw new Error(
+          result && result.message
+            ? result.message
+            : "第 " + (i + 1) + " 筆訂單送出失敗"
+        );
+      }
+    }
+
+    // ===== 全部真的完成後才顯示成功 =====
     const completedCount =
       agentBatchOrders.length;
 
@@ -2414,7 +2458,6 @@ async function submitAgentBatch(){
         0
       );
 
-
     status.innerHTML =
       "✅ 本批訂單全部完成<br>" +
       "共 " +
@@ -2423,8 +2466,7 @@ async function submitAgentBatch(){
       "代理貨款：$" +
       batchTotal.toLocaleString();
 
-
-    // 全部成功後才清掉本批
+    // ===== 全部成功後才清空 =====
     agentBatchOrders = [];
 
     cart = {};
@@ -2434,7 +2476,6 @@ async function submitAgentBatch(){
 
     document.getElementById("transferLast5").value = "";
     document.getElementById("transferProofFile").value = "";
-
 
   }catch(err){
 
@@ -2447,7 +2488,6 @@ async function submitAgentBatch(){
     btn.disabled = false;
   }
 }
-   
 function storeChanged(){
  let v=document.getElementById("storeName").value.replace(/\D/g,"").slice(0,6);
  document.getElementById("storeName").value=v;

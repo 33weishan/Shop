@@ -866,9 +866,9 @@ const PACKAGES={
  ],
  "悅刻12000口拋棄式":[
   {id:"c4a",label:"🆕 3入",price:1100,target:3},
-  {id:"c4b",label:"🆕 5入",price:1500,target:5},
-  {id:"c4c",label:"🆕 10入｜代理價",price:2800,target:10},
-  {id:"custom",label:"🌟 我要買10隻以上",custom:true,price:280}
+  {id:"c4b",label:"🆕 5入",price:1650,target:5},
+  {id:"c4c",label:"🆕 10入｜代理價",price:3000,target:10},
+  {id:"custom",label:"🌟 我要買10隻以上",custom:true,price:300}
  ],
  "悅刻積木拋棄式22000口":[
   {id:"c5a",label:"單支積木主機",price:250,target:1},
@@ -1017,10 +1017,14 @@ if(shopMode === "agent" && loggedAgentConfig){
   }else if(cat === "悅刻12000口拋棄式"){
     unitPrice = Number(loggedAgentConfig.prices.relx12000 || 0);
 
-  }else if(cat === "悅刻積木拋棄式22000口"){
-    unitPrice = Number(loggedAgentConfig.prices.block22000 || 0);
-    unitName = "顆";
-  }
+ }else if(cat === "悅刻積木拋棄式22000口"){
+  unitPrice = Number(loggedAgentConfig.prices.block22000 || 0);
+  unitName = "顆";
+
+}else if(cat === "積木主機"){
+  unitPrice = Number(loggedAgentConfig.prices.blockHost || 0);
+  unitName = "隻";
+}
 
   // 主機前面已經另外處理，所以這裡只處理有代理單價的商品
   if(unitPrice > 0){
@@ -1032,7 +1036,7 @@ if(shopMode === "agent" && loggedAgentConfig){
         <h2>${esc(cat)}</h2>
 
         <div class="result">
-          你的代理價：
+          代理價：
           <b style="font-size:22px;">
             $${unitPrice}／${unitName}
           </b>

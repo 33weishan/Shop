@@ -309,7 +309,51 @@ button.secondary{
 </style>
 <body><header><div class="brand">RELX & ILIA</div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
 <main class="wrap">
-<section id="shop">
+
+<!-- ===== 賣場入口 ===== -->
+<section id="entry">
+  <div class="panel">
+    <h2 style="text-align:center;">歡迎進入賣場</h2>
+
+    <button
+      type="button"
+      class="purple wide"
+      onclick="enterNormalShop()"
+    >
+      一般購買
+    </button>
+
+    <button
+      type="button"
+      class="wide"
+      onclick="showAgentEntry()"
+    >
+      我是代理
+    </button>
+
+    <div id="agentEntryBox" class="hidden" style="margin-top:18px;">
+      <label>代理碼</label>
+
+      <input
+        id="entryAgentCode"
+        placeholder="請輸入代理碼"
+        autocomplete="off"
+      >
+
+      <div id="entryAgentResult" class="result hidden"></div>
+
+      <button
+        type="button"
+        class="purple wide"
+        onclick="enterAgentShop()"
+      >
+        驗證並進入賣場
+      </button>
+    </div>
+  </div>
+</section>
+
+<section id="shop" class="hidden">
 <div class="hero-video">  
 <div class="new-title">新款上市</div>
 <video autoplay muted loop playsinline preload="metadata"><source src="hero.mp4" type="video/mp4"></video><div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
@@ -321,12 +365,26 @@ button.secondary{
 <label>手機號碼（必填）</label><input id="phone" inputmode="tel" maxlength="10" placeholder="09xxxxxxxx">
 <label>IG / LINE 聯絡帳號（必填）</label>
 <input id="contactAccount" placeholder="請輸入LINE ID / IG帳號">
-<label>輸入代理碼（選填）</label>
-<input id="agentCode" placeholder="如有代理碼請輸入" autocomplete="off" oninput="checkAgentCode()">
-<div id="agentCodeResult" class="result hidden"></div>
-<div id="bossPriceBox" class="hidden">
-<label>老闆給你什麼金額？</label>
-<input id="bossPrice" type="number" inputmode="numeric" min="1" placeholder="請輸入老闆給你的優惠價">
+<div id="checkoutAgentCodeBox">
+  <label>輸入代理碼（選填）</label>
+  <input
+    id="agentCode"
+    placeholder="如有代理碼請輸入"
+    autocomplete="off"
+    oninput="checkAgentCode()"
+  >
+  <div id="agentCodeResult" class="result hidden"></div>
+
+  <div id="bossPriceBox" class="hidden">
+    <label>老闆給你什麼金額？</label>
+    <input
+      id="bossPrice"
+      type="number"
+      inputmode="numeric"
+      min="1"
+      placeholder="請輸入老闆給你的優惠價"
+    >
+  </div>
 </div>
 <label>取貨超商</label>
 <input id="storeType" value="7-ELEVEN" readonly>
@@ -337,23 +395,145 @@ button.secondary{
 <label>備註（選填）</label>
 <input id="feedback" placeholder="如有需要備註的事項請填寫">
 
+<div id="agentShippingCodeBox" class="hidden">
+  <label>代理出貨代碼（必填）</label>
+  <input
+    id="agentShippingCode"
+    placeholder="請貼上這筆訂單的出貨代碼"
+    autocomplete="off"
+  >
+</div>
+
 <div id="msg" class="result hidden"></div>
-<button id="orderBtn" class="purple wide" onclick="submitOrder()">確認送出訂單</button>
+<div id="msg" class="result hidden"></div>
+   
+   <!-- ===== 代理付款確認區 ===== -->
+<div id="agentPaymentBox" class="hidden">
+
+  <h2>代理付款確認</h2>
+
+  <div class="summary">
+    <div>代理：<b id="agentPayName">-</b></div>
+    <div style="margin-top:10px;">
+      本批應付貨款：
+      <b id="agentPayAmount" style="font-size:24px;">$0</b>
+    </div>
+  </div>
+
+  <label>轉帳末五碼（必填）</label>
+  <input
+    id="transferLast5"
+    inputmode="numeric"
+    maxlength="5"
+    placeholder="請輸入轉帳帳號末五碼"
+  >
+
+  <label>轉帳證明（必填）</label>
+  <input
+    id="transferProofFile"
+    type="file"
+    accept="image/*"
+  >
+
+  <div id="transferPreview" class="hidden" style="margin-top:10px;">
+    <img
+      id="transferPreviewImg"
+      alt="轉帳證明預覽"
+      style="width:100%;max-height:260px;object-fit:contain;border-radius:10px;"
+    >
+  </div>
+
+ <p class="muted">
+  請確認轉帳末五碼與轉帳證明正確後，再送出本批訂單。
+</p>
+
+<button
+  id="agentBatchSubmitBtn"
+  type="button"
+  class="purple wide"
+  onclick="submitAgentBatch()"
+>
+  確認付款並送出本批訂單
+</button>
+
+<div id="agentBatchSubmitStatus" class="result hidden"></div>
+
+</div>
+<!-- 代理專用：先加入本批，不立即送後端 -->
+<button
+  id="agentBatchAddBtn"
+  type="button"
+  class="purple wide hidden"
+  onclick="addCurrentAgentOrderToBatch()"
+>
+  加入本批訂單
+</button>
+
+   <!-- ===== 代理本批訂單操作區 ===== -->
+<div id="agentBatchActionBox" class="hidden">
+
+  <div id="agentBatchSummary" class="result" style="margin-top:12px;">
+    本批目前 0 筆訂單
+  </div>
+
+  <button
+    type="button"
+    class="purple wide"
+    onclick="startNextAgentOrder()"
+  >
+    ＋ 再新增一筆訂單
+  </button>
+
+  <button
+    type="button"
+    class="wide"
+    onclick="goAgentBatchPayment()"
+  >
+    前往付款
+  </button>
+
+</div>
+
+<!-- 一般客人原本送出按鈕 -->
+<button
+  id="orderBtn"
+  class="purple wide"
+  onclick="submitOrder()"
+>
+  確認送出訂單
+</button>
+
 <button class="wide" onclick="showCart()">返回購物車</button>
 <p class="muted">送出後系統會再次確認庫存。訂單成立後才會扣除庫存。</p></div></section>
 <section id="done" class="hidden"><div class="panel"><h2>✓ 訂單已成立</h2><div id="receipt" class="summary"></div><p class="muted">我們會盡快處理您的訂單。</p><button class="purple wide" onclick="finish()">完成</button></div></section>
 </main><script>
    
-function checkAgentCode() {
+let currentAgentConfig = null;
+let agentCheckTimer = null;
+
+async function checkAgentCode() {
   const input = document.getElementById('agentCode');
   const result = document.getElementById('agentCodeResult');
   const bossPriceBox = document.getElementById('bossPriceBox');
   const bossPrice = document.getElementById('bossPrice');
+  const paymentBox = document.getElementById('agentPaymentBox');
 
   const code = String(input.value || '').trim().toLowerCase();
 
-  // 預設先把優惠價輸入框隱藏
+  // 每次代理碼改變，舊的代理資料立即失效
+  currentAgentConfig = null;
+
+  // 尚未正式進入付款階段前，付款區保持隱藏
+  paymentBox.classList.add('hidden');
+
+  // bossvip 優惠價預設隱藏
   bossPriceBox.classList.add('hidden');
+
+  // 清掉上一個延遲查詢
+  if (agentCheckTimer) {
+    clearTimeout(agentCheckTimer);
+    agentCheckTimer = null;
+  }
 
   if (!code) {
     result.classList.add('hidden');
@@ -362,32 +542,44 @@ function checkAgentCode() {
     return;
   }
 
-  if (code === 'alan111') {
-    result.textContent = '✓ Alan 代理單';
-    result.classList.remove('hidden');
-    bossPrice.value = '';
-    return;
-  }
-
-  if (code === 'ding000') {
-    result.textContent = '✓ 丁丁 代理單';
-    result.classList.remove('hidden');
-    bossPrice.value = '';
-    return;
-  }
-
+  // bossvip 維持原本功能，不進代理管理
   if (code === 'bossvip') {
     result.textContent = '✓ 老闆優惠價';
     result.classList.remove('hidden');
-
-    // 只有 bossvip 才顯示優惠價輸入框
     bossPriceBox.classList.remove('hidden');
     return;
   }
 
-  result.textContent = '代理碼無效，請確認後重新輸入';
-  result.classList.remove('hidden');
   bossPrice.value = '';
+
+  // 不要每打一個字就打一次後端
+  result.textContent = '正在確認代理碼…';
+  result.classList.remove('hidden');
+
+  agentCheckTimer = setTimeout(async () => {
+    const checkingCode = String(input.value || '').trim().toLowerCase();
+
+    // 使用者等待期間又改了代理碼，就放棄這次結果
+    if (checkingCode !== code) return;
+
+    const config = await loadAgentConfig(code);
+
+    // 查詢回來時再次確認輸入框沒有被改掉
+    if (String(input.value || '').trim().toLowerCase() !== code) return;
+
+    if (!config) {
+      currentAgentConfig = null;
+      result.textContent = '代理碼無效或目前未啟用';
+      result.classList.remove('hidden');
+      return;
+    }
+
+    currentAgentConfig = config;
+
+    result.textContent = '✓ ' + config.agentName;
+
+    result.classList.remove('hidden');
+  }, 350);
 }
    
 const CSV="https://docs.google.com/spreadsheets/d/1I1i9bTTNYsNlg8qkSi9VLOmci-IplxfBANU-cEJDFoc/export?format=csv&gid=121866907";
@@ -429,6 +621,92 @@ async function loadSellerConfig(){
     console.error("讀取銷售資料失敗",err);
     sellerConfig = null;
   }
+}
+
+   async function loadAgentConfig(agentCode){
+  const code = String(agentCode || "").trim().toLowerCase();
+
+  if(!code || code === "bossvip"){
+    return null;
+  }
+
+  try{
+    const res = await fetch(
+      API + "?agent=" + encodeURIComponent(code) + "&_=" + Date.now(),
+      {cache:"no-store"}
+    );
+
+    const data = await res.json();
+
+    if(data && data.success){
+      return data;
+    }
+
+    return null;
+
+  }catch(err){
+    console.error("讀取代理資料失敗",err);
+    return null;
+  }
+}
+   let shopMode = "normal";
+let loggedAgentConfig = null;
+let agentBatchOrders = [];
+
+function enterNormalShop(){
+  shopMode = "normal";
+  loggedAgentConfig = null;
+
+  document.getElementById("entry").classList.add("hidden");
+  document.getElementById("shop").classList.remove("hidden");
+}
+
+function showAgentEntry(){
+  const box = document.getElementById("agentEntryBox");
+  box.classList.remove("hidden");
+
+  setTimeout(() => {
+    document.getElementById("entryAgentCode").focus();
+  }, 50);
+}
+
+async function enterAgentShop(){
+  const input = document.getElementById("entryAgentCode");
+  const result = document.getElementById("entryAgentResult");
+
+  const code = String(input.value || "").trim().toLowerCase();
+
+  if(!code){
+    result.textContent = "請輸入代理碼";
+    result.classList.remove("hidden");
+    return;
+  }
+
+  result.textContent = "正在驗證代理碼…";
+  result.classList.remove("hidden");
+
+  const config = await loadAgentConfig(code);
+
+  if(!config){
+    loggedAgentConfig = null;
+    result.textContent = "代理碼無效或目前未啟用";
+    return;
+  }
+
+  // 驗證成功
+  shopMode = "agent";
+  loggedAgentConfig = config;
+
+  // 系統記住代理碼，代理之後不需要再輸入
+  const checkoutAgentInput = document.getElementById("agentCode");
+  if(checkoutAgentInput){
+    checkoutAgentInput.value = code;
+  }
+
+  result.textContent = "✓ " + config.agentName;
+
+  document.getElementById("entry").classList.add("hidden");
+  document.getElementById("shop").classList.remove("hidden");
 }
    
 const PACKAGES={
@@ -559,11 +837,21 @@ function render(){
       box=document.getElementById("products");
 
   if(cat==="主機"){
-    box.style.display="block";
+  box.style.display="block";
 
-    box.innerHTML=["五代主機","六代主機"].map(sub=>{
-      let price=sub==="五代主機"?800:1200,
-          items=g.items.filter(p=>p.sub===sub);
+  box.innerHTML=["五代主機","六代主機"].map(sub=>{
+
+    let price;
+
+    if(shopMode === "agent" && loggedAgentConfig){
+      price = sub === "五代主機"
+        ? loggedAgentConfig.prices.host5
+        : loggedAgentConfig.prices.host6;
+    }else{
+      price = sub === "五代主機" ? 800 : 1200;
+    }
+
+    let items=g.items.filter(p=>p.sub===sub);
 
       return `<div class="panel" style="margin-bottom:14px">
         <h2>${sub}｜$${price}／隻</h2>
@@ -575,6 +863,66 @@ function render(){
 
     return;
   }
+   
+// ===== 代理模式：單顆／單隻代理價 =====
+if(shopMode === "agent" && loggedAgentConfig){
+
+  let unitPrice = 0;
+  let unitName = "隻";
+
+  if(cat === "悅刻🥚"){
+    unitPrice = Number(loggedAgentConfig.prices.relx || 0);
+    unitName = "顆";
+
+  }else if(cat === "ILIA拋棄式6500口"){
+    unitPrice = Number(loggedAgentConfig.prices.ilia || 0);
+
+  }else if(cat === "悅刻8000口拋棄式"){
+    unitPrice = Number(loggedAgentConfig.prices.relx8000 || 0);
+
+  }else if(cat === "悅刻12000口拋棄式"){
+    unitPrice = Number(loggedAgentConfig.prices.relx12000 || 0);
+
+  }else if(cat === "悅刻積木拋棄式22000口"){
+    unitPrice = Number(loggedAgentConfig.prices.block22000 || 0);
+    unitName = "顆";
+  }
+
+  // 主機前面已經另外處理，所以這裡只處理有代理單價的商品
+  if(unitPrice > 0){
+
+    box.style.display = "block";
+
+    box.innerHTML = `
+      <div class="panel package-panel">
+        <h2>${esc(cat)}</h2>
+
+        <div class="result">
+          你的代理價：
+          <b style="font-size:22px;">
+            $${unitPrice}／${unitName}
+          </b>
+        </div>
+      </div>
+
+      <div class="grid">
+        ${g.items.map(p=>productPicker(p,cat,false)).join("")}
+      </div>
+
+      <div class="panel" style="margin-top:14px">
+        <button
+          type="button"
+          class="purple wide"
+          onclick="addAgentItems('${cat}', ${unitPrice})">
+          加入購物車
+        </button>
+      </div>
+    `;
+
+    return;
+  }
+}
+   
  // ===== 悅刻積木拋棄式22000口：單支積木主機 =====
 if(cat==="悅刻積木拋棄式22000口"){
   let cp=chosenPackage[cat];
@@ -1245,7 +1593,112 @@ if(["c5b","c5c","c5d"].includes(cp.id)){
   count();
   showCart();
 }
-function addC5(k){let q=draft[k]||0,p=find(k);if(q<=0)return alert("請先選擇數量");let bundleKey="C5-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);cart[bundleKey]={bundle:true,category:"主機",packageLabel:p.sub,price:p.price,target:q,items:[{key:k,qty:q}]};draft[k]=0;count();showCart()}
+   function addAgentItems(cat, unitPrice){
+
+  if(shopMode !== "agent" || !loggedAgentConfig){
+    return alert("代理資料讀取失敗，請重新進入賣場");
+  }
+
+  unitPrice = Number(unitPrice || 0);
+
+  if(!Number.isFinite(unitPrice) || unitPrice <= 0){
+    return alert("此商品尚未設定代理價");
+  }
+
+  const gi = SPECS.findIndex(x => x.label === cat);
+
+  if(gi < 0){
+    return alert("找不到商品分類");
+  }
+
+  let items = [];
+  let totalQty = 0;
+
+  Object.entries(draft).forEach(([k,q])=>{
+    q = Number(q || 0);
+
+    if(q > 0 && k.startsWith(gi + "-")){
+      items.push({
+        key:k,
+        qty:q
+      });
+
+      totalQty += q;
+    }
+  });
+
+  if(totalQty <= 0){
+    return alert("請先選擇商品數量");
+  }
+
+  const bundleKey =
+    "A-" + Date.now() + "-" + Math.random().toString(36).slice(2,6);
+
+  cart[bundleKey] = {
+    bundle:true,
+    agent:true,
+    category:cat,
+
+    // 代理沒有一般客人的套組
+    packageId:"agent-unit",
+    packageLabel:"代理單品",
+    price:unitPrice * totalQty,
+    unitPrice:unitPrice,
+    target:totalQty,
+
+    items:items,
+    gift:null
+  };
+
+  items.forEach(x => delete draft[x.key]);
+
+  count();
+  showCart();
+}
+   
+function addC5(k){
+  let q=draft[k]||0,
+      p=find(k);
+
+  if(q<=0){
+    return alert("請先選擇數量");
+  }
+
+  let price=Number(p.price||0);
+
+  // 代理模式改用該代理的主機單價
+  if(shopMode==="agent" && loggedAgentConfig){
+    price=p.sub==="五代主機"
+      ? Number(loggedAgentConfig.prices.host5||0)
+      : Number(loggedAgentConfig.prices.host6||0);
+
+    if(price<=0){
+      return alert("此主機尚未設定代理價");
+    }
+  }
+
+  let bundleKey=
+    "C5-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
+
+  cart[bundleKey]={
+    bundle:true,
+    category:"主機",
+    packageLabel:p.sub,
+    price:price,
+    target:q,
+    items:[
+      {
+        key:k,
+        qty:q
+      }
+    ]
+  };
+
+  draft[k]=0;
+
+  count();
+  showCart();
+}
 function find(k){for(let g of groups){let p=g.items.find(x=>x.key===k);if(p)return p}}
 function add(k){let p=find(k),q=cart[k]||0;if(q<p.stock)cart[k]=q+1;count()}
 function orderTotal(){
@@ -1261,6 +1714,12 @@ function orderTotal(){
     return s+basePrice+giftExtra;
   },0);
 
+  // 代理使用自己的出貨代碼，不計公司運費
+  if(shopMode === "agent"){
+    return productTotal;
+  }
+
+  // 一般客人加 $60 運費
   return productTotal + 60;
 }
 function count(){
@@ -1290,6 +1749,59 @@ function showCart(){
    `<div class="catTitle">${esc(cat)}</div>`+
    arr.map(([bk,b])=>{
 
+    // ===== 代理購物車 =====
+    if(shopMode==="agent"){
+
+     const qty=b.items.reduce(
+      (s,x)=>s+Number(x.qty||0),
+      0
+     );
+
+     const unitPrice=Number(
+      b.unitPrice!==undefined
+       ? b.unitPrice
+       : b.price||0
+     );
+
+     const subtotal=
+      b.category==="主機"
+       ? Number(b.price||0)*Number(b.target||0)
+       : Number(b.price||0);
+
+     return `
+      <div class="card" style="margin:10px 0">
+
+       <b>${esc(b.packageLabel)}</b>
+
+       <div style="margin-top:6px">
+        代理價：
+        <b>$${unitPrice.toLocaleString()}／${b.category==="悅刻🥚" || b.category==="悅刻積木拋棄式22000口" ? "顆" : "隻"}</b>
+       </div>
+
+       <div class="muted" style="margin-top:7px">
+        ${b.items.map(x=>{
+         let p=find(x.key);
+         return esc(p.name)+" × "+x.qty;
+        }).join("、")}
+       </div>
+
+       <div style="margin-top:8px">
+        數量：${qty}<br>
+        小計：<b>$${subtotal.toLocaleString()}</b>
+       </div>
+
+       <button
+        style="margin-top:10px"
+        onclick="delete cart['${bk}'];count();showCart()">
+        刪除此商品
+       </button>
+
+      </div>
+     `;
+    }
+
+
+    // ===== 一般客人購物車 =====
     let giftHtml="";
 
     if(b.gift){
@@ -1382,18 +1894,363 @@ function showCart(){
   document.getElementById("tq").parentElement.appendChild(totalBox);
  }
 
- totalBox.innerHTML=
-  "<b>訂單總金額：$"+
-  orderTotal().toLocaleString()+
-  "</b><br>商品：香水｜溫層：常溫｜運費：$60";
+ // ===== 代理 / 一般訂單總額顯示 =====
+ if(shopMode==="agent"){
+  totalBox.innerHTML=
+   "<b>代理應付商品總額：$"+
+   orderTotal().toLocaleString()+
+   "</b><br>運費：$0";
+ }else{
+  totalBox.innerHTML=
+   "<b>訂單總金額：$"+
+   orderTotal().toLocaleString()+
+   "</b><br>商品：香水｜溫層：常溫｜運費：$60";
+ }
 
  show("cart");
 }
-function goCheckout(){if(!Object.keys(cart).length)return alert("購物車沒有商品");show("checkout")}
+   function goCheckout(){
+  if(!Object.keys(cart).length){
+    return alert("購物車沒有商品");
+  }
+
+  // ===== 代理模式 =====
+  if(shopMode === "agent"){
+
+    if(!loggedAgentConfig){
+      return alert("代理資料讀取失敗，請重新登入代理");
+    }
+
+     // 代理：顯示「加入本批訂單」
+document
+  .getElementById("agentBatchAddBtn")
+  .classList.remove("hidden");
+
+document
+  .getElementById("orderBtn")
+  .classList.add("hidden");
+     document
+  .getElementById("checkoutAgentCodeBox")
+  .classList.add("hidden");
+
+    // 顯示每筆訂單自己的代理出貨代碼
+    document
+      .getElementById("agentShippingCodeBox")
+      .classList.remove("hidden");
+
+    // 先不顯示整批付款區
+    document
+      .getElementById("agentPaymentBox")
+      .classList.add("hidden");
+
+  }else{
+
+    // ===== 一般購買 =====
+
+     // 一般客人：維持原本送出按鈕
+document
+  .getElementById("agentBatchAddBtn")
+  .classList.add("hidden");
+
+document
+  .getElementById("orderBtn")
+  .classList.remove("hidden");
+     
+     document
+  .getElementById("checkoutAgentCodeBox")
+  .classList.remove("hidden");
+     
+    document
+      .getElementById("agentShippingCodeBox")
+      .classList.add("hidden");
+
+    document
+      .getElementById("agentPaymentBox")
+      .classList.add("hidden");
+  }
+
+  show("checkout");
+}
+   
 function makeId(){return "ORD-"+Date.now()+"-"+Math.random().toString(36).slice(2,9)}
 function postNoCors(payload){return fetch(API,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)})}
 function checkStatus(orderId){return new Promise((resolve,reject)=>{let cb="cb_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),s=document.createElement("script"),timer;window[cb]=d=>{cleanup();resolve(d)};function cleanup(){clearTimeout(timer);delete window[cb];s.remove()}s.onerror=()=>{cleanup();reject(Error("查詢失敗"))};timer=setTimeout(()=>{cleanup();reject(Error("查詢逾時"))},8000);s.src=API+"?orderId="+encodeURIComponent(orderId)+"&callback="+cb+"&_="+Date.now();document.body.appendChild(s)})}
 async function waitResult(id){for(let i=0;i<12;i++){try{let d=await checkStatus(id);if(d.status==="completed"||d.status==="failed")return d}catch(e){}await new Promise(r=>setTimeout(r,1000))}throw Error("訂單已送出，但暫時無法確認結果。請勿重複送出")}
+
+// ===== 壓縮代理轉帳證明 =====
+function compressAgentProof(file){
+  return new Promise((resolve,reject)=>{
+
+    const reader=new FileReader();
+
+    reader.onerror=()=>reject(
+      new Error("讀取轉帳證明失敗")
+    );
+
+    reader.onload=()=>{
+
+      const img=new Image();
+
+      img.onerror=()=>reject(
+        new Error("無法讀取這張圖片")
+      );
+
+      img.onload=()=>{
+
+        const maxSize=1600;
+
+        let width=img.width;
+        let height=img.height;
+
+        if(width>maxSize || height>maxSize){
+
+          const scale=Math.min(
+            maxSize/width,
+            maxSize/height
+          );
+
+          width=Math.round(width*scale);
+          height=Math.round(height*scale);
+        }
+
+        const canvas=document.createElement("canvas");
+
+        canvas.width=width;
+        canvas.height=height;
+
+        const ctx=canvas.getContext("2d");
+
+        ctx.drawImage(
+          img,
+          0,
+          0,
+          width,
+          height
+        );
+
+        const base64Data=canvas.toDataURL(
+          "image/jpeg",
+          0.82
+        );
+
+        resolve({
+          base64Data:base64Data,
+          mimeType:"image/jpeg",
+          fileName:"transfer-proof.jpg"
+        });
+      };
+
+      img.src=reader.result;
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+
+// ===== 查詢轉帳證明上傳結果 =====
+function checkAgentProofUpload(uploadId){
+
+  return new Promise((resolve,reject)=>{
+
+    const cb=
+      "proof_"+Date.now()+"_"+
+      Math.random().toString(36).slice(2,7);
+
+    const script=document.createElement("script");
+
+    let timer;
+
+    window[cb]=data=>{
+      cleanup();
+      resolve(data);
+    };
+
+    function cleanup(){
+      clearTimeout(timer);
+      delete window[cb];
+      script.remove();
+    }
+
+    script.onerror=()=>{
+      cleanup();
+      reject(new Error("查詢轉帳證明失敗"));
+    };
+
+    timer=setTimeout(()=>{
+      cleanup();
+      reject(new Error("查詢轉帳證明逾時"));
+    },8000);
+
+    script.src=
+      API+
+      "?uploadId="+encodeURIComponent(uploadId)+
+      "&callback="+encodeURIComponent(cb)+
+      "&_="+Date.now();
+
+    document.body.appendChild(script);
+  });
+}
+
+
+// ===== 上傳代理轉帳證明，只上傳一次 =====
+async function uploadAgentProof(){
+
+  const input=
+    document.getElementById("transferProofFile");
+
+  const file=input.files && input.files[0];
+
+  if(!file){
+    throw new Error("請上傳轉帳證明");
+  }
+
+  if(!file.type.startsWith("image/")){
+    throw new Error("轉帳證明必須是圖片");
+  }
+
+  const compressed=
+    await compressAgentProof(file);
+
+  const uploadId=
+    "PROOF-"+Date.now()+"-"+
+    Math.random().toString(36).slice(2,8);
+
+  await postNoCors({
+    action:"uploadAgentTransferProof",
+    uploadId:uploadId,
+    base64Data:compressed.base64Data,
+    fileName:compressed.fileName,
+    mimeType:compressed.mimeType
+  });
+
+  // 等待 Apps Script 完成 Drive 上傳
+  for(let i=0;i<15;i++){
+
+    try{
+
+      const result=
+        await checkAgentProofUpload(uploadId);
+
+      if(
+        result &&
+        result.success &&
+        result.status==="completed" &&
+        result.url
+      ){
+        return result.url;
+      }
+
+    }catch(err){
+      // 暫時查不到就繼續等
+    }
+
+    await new Promise(
+      resolve=>setTimeout(resolve,1000)
+    );
+  }
+
+  throw new Error(
+    "轉帳證明已送出，但暫時無法確認上傳結果，請勿重複送出"
+  );
+}   
+
+// ===== 正式送出代理整批訂單 =====
+async function submitAgentBatch(){
+
+  if(sending) return;
+
+  if(shopMode !== "agent" || !loggedAgentConfig){
+    return alert("代理資料讀取失敗，請重新登入代理");
+  }
+
+  if(!agentBatchOrders.length){
+    return alert("目前沒有可送出的代理訂單");
+  }
+
+  const transferLast5 =
+    document.getElementById("transferLast5").value.trim();
+
+  if(!/^\d{5}$/.test(transferLast5)){
+    return alert("請輸入正確的轉帳末五碼");
+  }
+
+  const proofInput =
+    document.getElementById("transferProofFile");
+
+  if(
+    !proofInput.files ||
+    !proofInput.files[0]
+  ){
+    return alert("請上傳轉帳證明");
+  }
+
+
+  const btn =
+    document.getElementById("agentBatchSubmitBtn");
+
+  const status =
+    document.getElementById("agentBatchSubmitStatus");
+
+  sending = true;
+  btn.disabled = true;
+
+  status.classList.remove("hidden");
+  status.textContent = "正在上傳轉帳證明…";
+
+  try{
+
+    // ===== 整批只上傳一次證明 =====
+    const proofUrl =
+      await uploadAgentProof();
+
+
+    // ===== 整批全部成功 =====
+
+    const completedCount =
+      agentBatchOrders.length;
+
+    const batchTotal =
+      agentBatchOrders.reduce(
+        (sum,order)=>
+          sum + Number(order.agentAmount || 0),
+        0
+      );
+
+
+    status.innerHTML =
+      "✅ 本批訂單全部完成<br>" +
+      "共 " +
+      completedCount +
+      " 筆<br>" +
+      "代理貨款：$" +
+      batchTotal.toLocaleString();
+
+
+    // 全部成功後才清掉本批
+    agentBatchOrders = [];
+
+    cart = {};
+    localStorage.removeItem("shop_cart");
+
+    count();
+
+    document.getElementById("transferLast5").value = "";
+    document.getElementById("transferProofFile").value = "";
+
+
+  }catch(err){
+
+    status.textContent =
+      "⚠️ " + err.message;
+
+  }finally{
+
+    sending = false;
+    btn.disabled = false;
+  }
+}
+   
 function storeChanged(){
  let v=document.getElementById("storeName").value.replace(/\D/g,"").slice(0,6);
  document.getElementById("storeName").value=v;
@@ -1406,13 +2263,243 @@ function storeChanged(){
  }
  box.innerHTML="✓ 店號格式正確：<b>"+esc(v)+"</b>";
 }
+
+   function addCurrentAgentOrderToBatch(){
+
+  if(shopMode !== "agent" || !loggedAgentConfig){
+    return alert("代理資料讀取失敗，請重新登入代理");
+  }
+
+  const name =
+    document.getElementById("name").value.trim();
+
+  const phone =
+    document.getElementById("phone").value.replace(/\s/g,"");
+
+  const storeType =
+    document.getElementById("storeType").value;
+
+  const storeName =
+    document.getElementById("storeName").value.trim();
+
+  const contactAccount =
+    document.getElementById("contactAccount").value.trim();
+
+  const feedback =
+    document.getElementById("feedback").value.trim();
+
+  const shippingCode =
+    document.getElementById("agentShippingCode").value.trim();
+
+
+  // ===== 基本資料檢查 =====
+
+  if(!name){
+    return alert("請填寫姓名");
+  }
+
+  if(!/^09\d{8}$/.test(phone)){
+    return alert("請輸入正確的10碼手機號碼");
+  }
+
+  if(!contactAccount){
+    return alert("請輸入LINE ID / IG帳號");
+  }
+
+  if(!storeType){
+    return alert("請選擇取貨超商");
+  }
+
+  if(!/^\d{6}$/.test(storeName)){
+    return alert("請輸入6碼 7-ELEVEN 門市店號");
+  }
+
+  if(!shippingCode){
+    return alert("請輸入這筆訂單的代理出貨代碼");
+  }
+
+  if(!Object.keys(cart).length){
+    return alert("購物車沒有商品");
+  }
+
+
+  // ===== 整理商品 =====
+
+  let items=[];
+
+  Object.entries(cart).forEach(([bundleKey,b])=>{
+
+    b.items.forEach(x=>{
+
+      const p=find(x.key);
+
+      items.push({
+        bundleKey:bundleKey,
+        category:b.category,
+        subCategory:p.sub||"",
+        packageId:b.packageId||"",
+        packageLabel:b.packageLabel,
+        packagePrice:b.price,
+        productName:p.name,
+        quantity:x.qty,
+        gift:null
+      });
+
+    });
+
+  });
+
+
+  // ===== 建立這一筆暫存訂單 =====
+
+  const order={
+    orderId:makeId(),
+
+    customer:{
+      name:name,
+      phone:phone,
+      storeType:storeType,
+      storeName:storeName,
+      contactAccount:contactAccount,
+      feedback:feedback,
+
+      // 代理碼直接使用入口已驗證的代理
+      agentCode:loggedAgentConfig.agentCode,
+
+      sellerCode:sellerCode,
+
+      // 這筆訂單自己的出貨代碼
+      agentShippingCode:shippingCode
+    },
+
+    items:items,
+
+    // 目前這筆代理商品成本
+    agentAmount:orderTotal()
+  };
+
+
+  agentBatchOrders.push(order);
+
+// ===== 更新本批訂單摘要 =====
+const batchTotal = agentBatchOrders.reduce(
+  (sum, o) => sum + Number(o.agentAmount || 0),
+  0
+);
+
+document.getElementById("agentBatchSummary").innerHTML =
+  "本批目前 <b>" +
+  agentBatchOrders.length +
+  "</b> 筆訂單<br>" +
+  "代理應付總額：<b style='font-size:22px;'>$" +
+  batchTotal.toLocaleString() +
+  "</b>";
+
+document
+  .getElementById("agentBatchActionBox")
+  .classList.remove("hidden");
+
+document
+  .getElementById("agentBatchAddBtn")
+  .classList.add("hidden");
+      
+  alert(
+    "已加入本批訂單\n\n"+
+    "客人："+name+"\n"+
+    "本筆貨款：$"+
+    Number(order.agentAmount).toLocaleString()+"\n\n"+
+    "目前共 "+agentBatchOrders.length+" 筆訂單"
+  );
+}
+
+   function startNextAgentOrder(){
+
+  if(shopMode !== "agent" || !loggedAgentConfig){
+    return alert("代理資料讀取失敗，請重新登入代理");
+  }
+
+  // 清空目前購物車，已加入本批的訂單不受影響
+  cart = {};
+  localStorage.removeItem("shop_cart");
+  count();
+
+  // 清空上一位客人的資料
+  document.getElementById("name").value = "";
+  document.getElementById("phone").value = "";
+  document.getElementById("contactAccount").value = "";
+  document.getElementById("feedback").value = "";
+  document.getElementById("storeType").value = "7-ELEVEN";
+  document.getElementById("storeName").value = "";
+  document.getElementById("agentShippingCode").value = "";
+
+  // 清除門市驗證顯示
+  document
+    .getElementById("storeVerify")
+    .classList.add("hidden");
+
+  // 隱藏上一筆完成後的操作區
+  document
+    .getElementById("agentBatchActionBox")
+    .classList.add("hidden");
+
+  // 下一筆之後仍然會再使用「加入本批訂單」
+  document
+    .getElementById("agentBatchAddBtn")
+    .classList.remove("hidden");
+
+  // 回商品頁開始選第二筆
+  show("shop");
+}
+
+function goAgentBatchPayment(){
+
+  if(shopMode !== "agent" || !loggedAgentConfig){
+    return alert("代理資料讀取失敗，請重新登入代理");
+  }
+
+  if(!agentBatchOrders.length){
+    return alert("目前還沒有加入任何訂單");
+  }
+
+  // ===== 計算整批代理應付貨款 =====
+  const batchTotal = agentBatchOrders.reduce(
+    (sum, order) => sum + Number(order.agentAmount || 0),
+    0
+  );
+
+  // 顯示代理姓名
+  document.getElementById("agentPayName").textContent =
+    loggedAgentConfig.agentName;
+
+  // 顯示整批應付金額
+  document.getElementById("agentPayAmount").textContent =
+    "$" + batchTotal.toLocaleString();
+
+  // 顯示付款區
+  document
+    .getElementById("agentPaymentBox")
+    .classList.remove("hidden");
+
+  // 暫時隱藏本批操作區
+  document
+    .getElementById("agentBatchActionBox")
+    .classList.add("hidden");
+
+  // 確保一般送出按鈕不出現
+  document
+    .getElementById("orderBtn")
+    .classList.add("hidden");
+
+  // 確保加入本批按鈕不出現
+  document
+    .getElementById("agentBatchAddBtn")
+    .classList.add("hidden");
+}
+   
 async function submitOrder(){if(sending)return;let name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\s/g,""),storeType=document.getElementById("storeType").value,storeName=document.getElementById("storeName").value.trim(),contactAccount=document.getElementById("contactAccount").value.trim(),feedback=document.getElementById("feedback").value.trim(),agentCode=document.getElementById("agentCode").value.trim().toLowerCase(),bossPrice=document.getElementById("bossPrice").value.trim(),m=document.getElementById("msg");
 if(!name)return alert("請填寫姓名");
 if(!/^09\d{8}$/.test(phone))return alert("請輸入正確的10碼手機號碼");
 if(!contactAccount)return alert("請輸入LINE ID / IG帳號");
-if(agentCode && !["alan111","ding000","bossvip"].includes(agentCode)){
-  return alert("代理碼無效，請確認後重新輸入");
-}
 if(agentCode==="bossvip"){
   const price=Number(bossPrice);
   if(!bossPrice || !Number.isFinite(price) || price<=0){

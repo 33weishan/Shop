@@ -701,7 +701,8 @@ button.secondary{
   </div>
 </div>   
 </main>
-   function showSupportPopup(){
+   <script>
+ function showSupportPopup(){
   const popup=document.getElementById("supportPopup");
 
   if(popup){
@@ -715,9 +716,7 @@ function closeSupportPopup(){
   if(popup){
     popup.style.display="none";
   }
-}
-   <script>
-   
+}   
 let currentAgentConfig = null;
 let agentCheckTimer = null;
 

@@ -376,6 +376,24 @@ button.secondary{
     <span style="margin:0 8px;">｜</span>
     客服時間：12:00－20:00
   </div>
+   
+   <a
+  href="https://line.me/R/ti/p/~relxilia000"
+  target="_blank"
+  style="
+    display:inline-block;
+    margin-top:10px;
+    padding:10px 22px;
+    border-radius:999px;
+    background:#06c755;
+    color:#fff;
+    text-decoration:none;
+    font-size:15px;
+    font-weight:700;
+  "
+>
+  有問題詢問客服
+</a>
 
 </div>
 <div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
@@ -542,8 +560,163 @@ button.secondary{
 
 <button class="wide" onclick="showCart()">返回購物車</button>
 <p class="muted">送出後系統會再次確認庫存。訂單成立後才會扣除庫存。</p></div></section>
-<section id="done" class="hidden"><div class="panel"><h2>✓ 訂單已成立</h2><div id="receipt" class="summary"></div><p class="muted">我們會盡快處理您的訂單。</p><button class="purple wide" onclick="finish()">完成</button></div></section>
-</main><script>
+<section id="done" class="hidden"><div class="panel"><h2>✓ 訂單已成立</h2><div id="receipt" class="summary"></div><p class="muted">我們會盡快處理您的訂單。</p><button class="purple wide" onclick="finish()">完成</button>
+<div style="
+  margin-top:20px;
+  padding:18px;
+  border-radius:18px;
+  background:#f5f5f5;
+  text-align:center;
+">
+
+  <div style="
+    font-size:19px;
+    font-weight:700;
+    margin-bottom:8px;
+  ">
+    訂單已成功送出
+  </div>
+
+  <div style="
+    font-size:15px;
+    line-height:1.7;
+    margin-bottom:14px;
+  ">
+    請加入客服，以方便後續聯繫。<br>
+    訂單如有任何問題，請直接聯繫客服。
+  </div>
+
+  <a
+    href="https://line.me/R/ti/p/~relxilia000"
+    target="_blank"
+    style="
+      display:inline-block;
+      padding:12px 26px;
+      border-radius:999px;
+      background:#06c755;
+      color:#fff;
+      text-decoration:none;
+      font-size:16px;
+      font-weight:700;
+    "
+  >
+    ＋ 加入 LINE 客服
+  </a>
+
+  <div style="
+    margin-top:10px;
+    font-size:13px;
+    color:#777;
+  ">
+    LINE ID：relxilia000<br>
+    客服時間：12:00－20:00
+  </div>
+</div></section>
+<!-- ===== 下單成功客服彈窗 ===== -->
+<div id="supportPopup" style="
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  z-index:99999;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+">
+
+  <div style="
+    width:100%;
+    max-width:380px;
+    background:#fff;
+    border-radius:24px;
+    padding:26px 22px;
+    text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+  ">
+
+    <div style="
+      font-size:24px;
+      font-weight:800;
+      margin-bottom:10px;
+    ">
+      ✓ 訂單已成立
+    </div>
+
+    <div style="
+      font-size:16px;
+      line-height:1.7;
+      margin-bottom:20px;
+      color:#333;
+    ">
+      請加入客服，以方便後續聯繫。<br>
+      有任何訂單相關問題，請直接聯繫客服。
+    </div>
+
+    <a
+      href="https://line.me/R/ti/p/~relxilia000"
+      target="_blank"
+      style="
+        display:block;
+        padding:14px 20px;
+        border-radius:999px;
+        background:#06c755;
+        color:#fff;
+        text-decoration:none;
+        font-size:17px;
+        font-weight:800;
+        margin-bottom:12px;
+      "
+    >
+      ＋ 加入 LINE 客服
+    </a>
+
+    <div style="
+      font-size:14px;
+      color:#777;
+      line-height:1.7;
+      margin-bottom:18px;
+    ">
+      LINE ID：relxilia000<br>
+      客服時間：12:00－20:00
+    </div>
+
+    <button
+      type="button"
+      onclick="closeSupportPopup()"
+      style="
+        width:100%;
+        padding:12px;
+        border:0;
+        border-radius:999px;
+        background:#111;
+        color:#fff;
+        font-size:16px;
+        font-weight:700;
+        cursor:pointer;
+      "
+    >
+      我知道了
+    </button>
+
+  </div>
+</div>   
+</main>
+   function showSupportPopup(){
+  const popup=document.getElementById("supportPopup");
+
+  if(popup){
+    popup.style.display="flex";
+  }
+}
+
+function closeSupportPopup(){
+  const popup=document.getElementById("supportPopup");
+
+  if(popup){
+    popup.style.display="none";
+  }
+}
+   <script>
    
 let currentAgentConfig = null;
 let agentCheckTimer = null;
@@ -2821,7 +2994,13 @@ document.getElementById("receipt").innerHTML=`訂單編號：<b>${esc(d.orderId)
  });
  return Object.values(gs).map(g=>`<b>${esc(g.cat)}</b>${g.pack?`｜${esc(g.pack)}`:""}<br>`+g.items.map(x=>`${esc(x.productName)} × ${x.quantity}`).join("<br>")).join("<br><br>");
 })();
-cart={};localStorage.removeItem("shop_cart");count();await load();show("done")}catch(e){m.textContent="⚠️ "+e.message+"（訂單編號："+orderId+"）"}finally{sending=false;b.disabled=false}}
+cart={};
+    localStorage.removeItem("shop_cart");
+    count();
+    await load();
+    show("done");
+showSupportPopup();
+   }catch(e){m.textContent="⚠️ "+e.message+"（訂單編號："+orderId+"）"}finally{sending=false;b.disabled=false}}
 function finish(){
   document.getElementById("name").value="";
   document.getElementById("phone").value="";

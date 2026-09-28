@@ -347,7 +347,31 @@ button.secondary{
 <section id="shop" class="hidden"> 
 <div class="hero-video">  
 <div class="new-title">新款上市</div>
-<video autoplay muted loop playsinline preload="metadata"><source src="hero.mp4" type="video/mp4"></video><div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div></div><div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
+<video autoplay muted loop playsinline preload="metadata"><source src="hero.mp4" type="video/mp4"></video>
+   <div id="sync" class="muted" style="color:white;margin-top:8px">同步中…</div>
+   <div style="
+  margin:12px 0 18px;
+  padding:14px 16px;
+  border:1px solid #e5e5e5;
+  border-radius:16px;
+  background:#fff;
+  text-align:center;
+  line-height:1.7;
+">
+  <div style="
+    font-size:18px;
+    font-weight:700;
+    margin-bottom:6px;
+  ">
+    有問題歡迎聯繫客服
+  </div>
+
+  <div style="font-size:15px;">
+    LINE ID：<b>relxilia000</b><br>
+    客服時間：12:00－20:00
+  </div>
+</div>
+<div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
 <section id="cart" class="hidden"><div class="panel"><button class="backBtn" onclick="show('shop')">← 返回購物</button><h2>購物車</h2><div id="rows"></div><p><b>共 <span id="tq">0</span> 件</b></p><button class="purple wide" onclick="goCheckout()">前往填寫取貨資料</button><button class="wide" onclick="show('shop')">繼續購物</button></div></section>
 <section id="checkout" class="hidden"><div class="panel">
 <button type="button" class="secondary" onclick="show('cart')">← 返回購物車</button>

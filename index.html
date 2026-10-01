@@ -12,6 +12,14 @@
 }
    .card,.panel{background:#fff;border-radius:18px;padding:16px}.name{font-size:18px;font-weight:800}.stock,.muted{font-size:13px;color:#777}.stock{margin:6px 0 13px}.add{width:100%;border:0;border-radius:12px;background:#6842c2;color:#fff;font-weight:800;padding:11px}.add:disabled{background:#ccc}.hidden{display:none}.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #eee}.qty{display:flex;align-items:center;gap:7px}.qty button{border:0;border-radius:9px;padding:8px 12px;font-size:18px}.qty input{width:64px;margin:0;padding:8px 5px;text-align:center;border:1px solid #ddd;border-radius:9px;font-size:17px}.catTitle{font-size:17px;font-weight:900;padding:16px 0 5px;border-bottom:2px solid #eee}.backBtn{border:0;background:transparent;font-size:18px;font-weight:800;padding:4px 0 14px}.wide{width:100%;margin-top:10px}input,select{width:100%;padding:13px;border:1px solid #ddd;border-radius:12px;font-size:16px;margin:6px 0 12px;background:#fff}label{font-weight:800}.result{padding:13px;border-radius:12px;background:#f2f2f2;margin-top:12px}.summary{line-height:1.8}@media(max-width:520px){.grid{grid-template-columns:1fr}}</style></head>
    <style>
+      .tab-check{
+  color:#16a34a;
+  font-size:24px;
+  font-weight:900;
+  line-height:1;
+  margin-right:5px;
+  vertical-align:-2px;
+}
 html,body{
   background:#f3f0eb !important;
   color:#171717 !important;
@@ -1195,7 +1203,7 @@ async function load(){try{
    function renderTabs(){
   document.getElementById("tabs").innerHTML=groups.map((g,i)=>{
     if(shopMode !== "agent" && g.name==="積木主機") return "";
-    return `<button class="tab ${i===active?"on":""}" onclick="active=${i};renderTabs();render()">${i===active?"✓ ":""}${g.name}</button>`;
+    return `<button class="tab ${i===active?"on":""}" onclick="active=${i};renderTabs();render()">${i===active?'<span class="tab-check">✓</span> ':""}${g.name}</button>`;
   }).join("");
 }
 function ensureCandyTitle(){

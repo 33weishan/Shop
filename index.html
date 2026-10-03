@@ -1131,7 +1131,61 @@ async function load(){try{
  // 如果是銷售專屬網址，先讀取銷售設定
  await loadSellerConfig();
 
- let z=await fetch(CSV+"&_="+Date.now(),{cache:"no-store"}),all=csv(await z.text());
+ // ===== 庫存同步：失敗自動重試 3 次 =====
+let z = null;
+let lastError = null;
+
+for(let attempt = 1; attempt <= 3; attempt++){
+
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => controller.abort(),
+    8000
+  );
+
+  try{
+
+    z = await fetch(
+      CSV + "&_=" + Date.now(),
+      {
+        cache:"no-store",
+        signal:controller.signal
+      }
+    );
+
+    if(!z.ok){
+      throw new Error("庫存伺服器回應異常");
+    }
+
+    lastError = null;
+    break;
+
+  }catch(err){
+
+    console.warn(
+      "庫存同步第 " + attempt + " 次失敗",
+      err
+    );
+
+    z = null;
+    lastError = err;
+
+    if(attempt < 3){
+      await new Promise(
+        resolve => setTimeout(resolve,1000)
+      );
+    }
+
+  }finally{
+    clearTimeout(timeout);
+  }
+}
+
+if(!z || lastError){
+  throw new Error("庫存同步失敗，請重新整理頁面");
+}
+
+const all = csv(await z.text());
  groups=SPECS.map((s,g)=>{
    if(!s.custom) return {
      name:s.label,

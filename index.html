@@ -347,8 +347,13 @@ button.secondary{
   letter-spacing:3px;
   text-shadow:0 2px 8px rgba(0,0,0,.55);
 }
+/* 右上角獨立訂單查詢入口 */
+.header-actions{display:flex;align-items:center;gap:8px}
+.header-actions button{white-space:nowrap}
+.header-status-btn{background:#fff;color:#171717;border:1px solid #171717;border-radius:12px;padding:11px 12px;font-size:14px;font-weight:700;cursor:pointer}
+@media(max-width:420px){header{padding:12px 10px}.brand{font-size:19px!important}.header-actions{gap:6px}.header-status-btn{padding:10px 8px;font-size:12px}.header-actions .purple{padding:10px 9px;font-size:13px}}
 </style>
-<body><header><div class="brand">RELX & ILIA</div><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></header>
+<body><header><div class="brand">RELX & ILIA</div><div class="header-actions"><button type="button" class="header-status-btn" onclick="showOrderLookup()">查詢訂單</button><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></div></header>
 <main class="wrap">
 
 <!-- ===== 代理專屬入口 ===== -->
@@ -438,6 +443,18 @@ button.secondary{
 
 </div>
 <div class="tabs" id="tabs"></div><div class="grid" id="products"></div></section>
+<section id="orderLookup" class="hidden">
+  <div class="panel">
+    <button type="button" class="backBtn" onclick="show('shop')">← 返回購物</button>
+    <h2>查詢訂單進度</h2>
+    <label for="statusName">訂購姓名</label>
+    <input id="statusName" autocomplete="name" placeholder="請輸入下單時的姓名">
+    <label for="statusLast3">手機後三碼</label>
+    <input id="statusLast3" inputmode="numeric" maxlength="3" placeholder="例如 123">
+    <button type="button" class="purple wide" onclick="lookupOrderStatus('statusName','statusLast3','statusResult')">查詢進度</button>
+    <div id="statusResult" class="result hidden" aria-live="polite"></div>
+  </div>
+</section>
 <section id="cart" class="hidden"><div class="panel"><button class="backBtn" onclick="show('shop')">← 返回購物</button><h2>購物車</h2><div id="rows"></div><p><b>共 <span id="tq">0</span> 件</b></p><button class="purple wide" onclick="goCheckout()">前往填寫取貨資料</button><button class="wide" onclick="show('shop')">繼續購物</button></div></section>
 <section id="checkout" class="hidden"><div class="panel">
 <button type="button" class="secondary" onclick="show('cart')">← 返回購物車</button>
@@ -601,7 +618,7 @@ button.secondary{
 
 <button class="wide" onclick="showCart()">返回購物車</button>
 <p class="muted">送出後系統會再次確認庫存。訂單成立後才會扣除庫存。</p></div></section>
-<section id="done" class="hidden"><div class="panel"><h2>✓ 訂單已成立</h2><div id="receipt" class="summary"></div><p class="muted">我們會盡快處理您的訂單。</p><button class="purple wide" onclick="finish()">完成</button>
+<section id="done" class="hidden"><div class="panel"><h2>✓ 訂單已成立</h2><div id="receipt" class="summary"></div><div class="result" style="margin-top:12px"><b>目前進度：訂單成立</b><p style="margin-bottom:0">訂單已收到，待安排出貨。</p></div><button type="button" class="purple wide" onclick="showOrderLookupFromReceipt()">查看最新訂單進度</button><p class="muted">我們會盡快處理您的訂單。</p><button class="purple wide" onclick="finish()">完成</button>
 <div style="
   margin-top:20px;
   padding:18px;
@@ -2202,7 +2219,7 @@ function count(){
 
   localStorage.setItem("shop_cart",JSON.stringify(cart));
 }
-function show(id){["shop","cart","checkout","done"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));scrollTo(0,0)}
+function show(id){["shop","cart","checkout","done","orderLookup"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id));scrollTo(0,0)}
 function showCart(){
  let entries=Object.entries(cart),el=document.getElementById("rows");
 
@@ -3092,9 +3109,66 @@ cart={};
     localStorage.removeItem("shop_cart");
     count();
     await load();
+    lastCompletedCustomer = {name:d.customer.name, phone:d.customer.phone};
     show("done");
 showSupportPopup();
    }catch(e){m.textContent="⚠️ "+e.message+"（訂單編號："+orderId+"）"}finally{sending=false;b.disabled=false}}
+let lastCompletedCustomer = null;
+function statusJsonp(name, last3) {
+  return new Promise((resolve, reject) => {
+    const cb = 'orderStatusCb_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+    const script = document.createElement('script');
+    let done = false;
+    const cleanup = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      try { delete window[cb]; } catch (_) { window[cb] = undefined; }
+      script.remove();
+    };
+    window[cb] = result => { cleanup(); resolve(result); };
+    script.onerror = () => { cleanup(); reject(new Error('查詢連線失敗')); };
+    const timer = setTimeout(() => { cleanup(); reject(new Error('查詢逾時')); }, 10000);
+    script.src = API + '?action=orderStatus&name=' + encodeURIComponent(name) +
+      '&last3=' + encodeURIComponent(last3) + '&callback=' + encodeURIComponent(cb) + '&_=' + Date.now();
+    document.body.appendChild(script);
+  });
+}
+async function lookupOrderStatus(nameId, last3Id, resultId) {
+  const name = document.getElementById(nameId).value.trim();
+  const last3 = document.getElementById(last3Id).value.replace(/\D/g,'');
+  const box = document.getElementById(resultId);
+  box.classList.remove('hidden');
+  if (!name || !/^\d{3}$/.test(last3)) {
+    box.textContent = '請填寫訂購姓名和手機後三碼'; return;
+  }
+  box.textContent = '查詢中…';
+  try {
+    const data = await statusJsonp(name, last3);
+    if (!data.success) { box.textContent = data.message || '查詢失敗'; return; }
+    if (!data.orders || !data.orders.length) { box.textContent = '查無符合的訂單，請確認姓名與手機末三碼'; return; }
+    box.innerHTML = data.orders.map(x => {
+      const note = x.status === '已出貨' ? '這幾天請注意手機取貨訊息。' :
+        x.status === '準備出貨中' ? '您的訂單正在準備出貨。' : '您的訂單已成立。';
+      return '<div style="padding:10px 0;border-bottom:1px solid #ddd"><b>' + esc(x.date) +
+        '｜' + esc(x.status) + '</b><div>' + esc(note) + '</div></div>';
+    }).join('');
+  } catch (e) { box.textContent = '查詢暫時失敗，請稍後重試'; }
+}
+function showOrderLookup(){
+  closeSupportPopup();
+  show('orderLookup');
+}
+function showOrderLookupFromReceipt() {
+  closeSupportPopup();
+  show('orderLookup');
+  if (lastCompletedCustomer) {
+    document.getElementById('statusName').value = lastCompletedCustomer.name;
+    document.getElementById('statusLast3').value = lastCompletedCustomer.phone.slice(-3);
+    lookupOrderStatus('statusName','statusLast3','statusResult');
+  }
+  document.getElementById('statusName').scrollIntoView({behavior:'smooth',block:'center'});
+}
 function finish(){
   document.getElementById("name").value="";
   document.getElementById("phone").value="";

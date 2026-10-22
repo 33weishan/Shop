@@ -351,13 +351,7 @@ button.secondary{
   font-weight:700;
   letter-spacing:3px;
   text-shadow:0 2px 8px rgba(0,0,0,.55);
-}<body>
-<div style="background:#fff3cd;color:#664d03;padding:14px;text-align:center;font-size:15px;line-height:1.8;border-bottom:1px solid #ffecb5;">
-  <strong>📢【賣場公告】</strong><br>
-  悦刻 8000 口目前全台大缺貨，預計 2027 年 2 月恢復販售。<br>
-  造成不便，敬請見諒，感謝您的理解與支持！
-</div>
-<header>
+}
 /* 右上角獨立訂單查詢入口 */
 .header-actions{display:flex;align-items:center;gap:8px}
 .header-actions button{white-space:nowrap}
@@ -365,7 +359,11 @@ button.secondary{
 @media(max-width:420px){header{padding:12px 10px}.brand{font-size:19px!important}.header-actions{gap:6px}.header-status-btn{padding:10px 8px;font-size:12px}.header-actions .purple{padding:10px 9px;font-size:13px}}
 </style>
 <body>
-   
+<div style="background:#fff3cd;color:#664d03;padding:14px;text-align:center;font-size:15px;line-height:1.8;border-bottom:1px solid #ffecb5;">
+  <strong>📢【賣場公告】</strong><br>
+  悦刻 8000 口目前全台大缺貨，預計 2027 年 2 月恢復販售。<br>
+  造成不便，敬請見諒，感謝您的理解與支持！
+</div>
 <header><div class="brand">RELX & ILIA</div><div class="header-actions"><button type="button" class="header-status-btn" onclick="showOrderLookup()">查詢訂單</button><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></div></header>
 <main class="wrap">
 
@@ -772,7 +770,41 @@ button.secondary{
   </div>
 </div>   
 </main>
-   <script>
+   <script id="shop-update-watch">
+(function(){
+  const signature = doc => Array.from(doc.querySelectorAll("style,script"))
+    .filter(el => el.id !== "shop-update-watch")
+    .map(el => el.tagName + ":" + (el.textContent || "")).join("\n") +
+    "\n" + (doc.querySelector("body > div")?.textContent || "");
+  const original = signature(document);
+  let checking = false;
+  async function checkForUpdate(){
+    if(checking || document.hidden) return;
+    checking = true;
+    try{
+      const url = new URL("index.html", location.href);
+      url.searchParams.set("_fresh", String(Date.now()));
+      const response = await fetch(url.toString(), {cache:"no-store"});
+      if(!response.ok) return;
+      const latest = new DOMParser().parseFromString(await response.text(), "text/html");
+      if(signature(latest) === original) return;
+      const unsafe = ["checkout","done","cart","entry"].some(id => {
+        const el = document.getElementById(id);
+        return el && !el.classList.contains("hidden");
+      }) || (typeof cart !== "undefined" && Object.keys(cart).length > 0) ||
+        (typeof agentBatchOrders !== "undefined" && agentBatchOrders.length > 0) ||
+        (typeof sending !== "undefined" && sending);
+      if(!unsafe) location.reload();
+    }catch(err){ console.warn("版本檢查暫時失敗",err); }
+    finally{checking=false;}
+  }
+  window.addEventListener("load", () => {
+    setTimeout(checkForUpdate, 15000);
+    setInterval(checkForUpdate, 300000);
+  });
+})();
+</script>
+<script>
  function showSupportPopup(){
   const popup=document.getElementById("supportPopup");
 

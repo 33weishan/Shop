@@ -359,11 +359,24 @@ button.secondary{
 @media(max-width:420px){header{padding:12px 10px}.brand{font-size:19px!important}.header-actions{gap:6px}.header-status-btn{padding:10px 8px;font-size:12px}.header-actions .purple{padding:10px 9px;font-size:13px}}
 </style>
 <body>
-<div style="background:#fff3cd;color:#664d03;padding:14px;text-align:center;font-size:15px;line-height:1.8;border-bottom:1px solid #ffecb5;">
-  <strong>📢【賣場公告】</strong><br>
-  悦刻 8000 口目前全台大缺貨，預計 2027 年 2 月恢復販售。<br>
-  造成不便，敬請見諒，感謝您的理解與支持！
+<!-- 賣場開啟公告：不影響購物車或訂單流程 -->
+<div id="storeNoticeModal" role="dialog" aria-modal="true" aria-labelledby="storeNoticeTitle" style="position:fixed;inset:0;z-index:1000001;background:rgba(0,0,0,.56);display:flex;align-items:center;justify-content:center;padding:22px;">
+  <div style="position:relative;width:100%;max-width:420px;background:#fff;color:#171717;border:1px solid #171717;border-radius:14px;padding:32px 24px 24px;box-shadow:0 18px 55px rgba(0,0,0,.22);text-align:center;line-height:1.75;">
+    <button type="button" aria-label="關閉公告" onclick="closeStoreNotice()" style="position:absolute;right:12px;top:8px;background:transparent;border:0;color:#171717;font-size:29px;cursor:pointer;padding:3px 9px;">×</button>
+    <div aria-hidden="true" style="font-size:32px;margin-bottom:8px;">⚠</div>
+    <div id="storeNoticeTitle" style="font-size:23px;font-weight:800;letter-spacing:2px;margin-bottom:16px;">賣場公告</div>
+    <div style="height:1px;background:#ddd;margin:0 0 20px;"></div>
+    <p style="font-size:17px;margin:0 0 12px;font-weight:700;">悦刻 8000 口目前全台大缺貨</p>
+    <p style="font-size:16px;margin:0 0 18px;">預計 2027 年 2 月恢復販售。<br>造成不便，敬請見諒。</p>
+    <button type="button" onclick="closeStoreNotice()" style="width:100%;border:0;border-radius:8px;background:#171717;color:#fff;font-size:16px;font-weight:700;padding:13px;cursor:pointer;">我知道了</button>
+  </div>
 </div>
+<script>
+function closeStoreNotice(){
+  const modal=document.getElementById("storeNoticeModal");
+  if(modal) modal.style.display="none";
+}
+</script>
 <header><div class="brand">RELX & ILIA</div><div class="header-actions"><button type="button" class="header-status-btn" onclick="showOrderLookup()">查詢訂單</button><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></div></header>
 <main class="wrap">
 

@@ -817,7 +817,7 @@ function closeStoreNotice(){
       }) || (typeof cart !== "undefined" && Object.keys(cart).length > 0) ||
         (typeof agentBatchOrders !== "undefined" && agentBatchOrders.length > 0) ||
         (typeof sending !== "undefined" && sending);
-      if(!unsafe) location.reload();
+      // 不自動重新整理：避免顧客選購或填寫訂單時被中斷。
     }catch(err){ console.warn("版本檢查暫時失敗",err); }
     finally{checking=false;}
   }

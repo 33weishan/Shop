@@ -373,9 +373,18 @@ button.secondary{
   </div>
 </div>
 <script>
+(function(){
+  const modal=document.getElementById("storeNoticeModal");
+  try{
+    if(localStorage.getItem("shop_notice_seen_v1")==="1" && modal){
+      modal.style.display="none";
+    }
+  }catch(_){}
+})();
 function closeStoreNotice(){
   const modal=document.getElementById("storeNoticeModal");
   if(modal) modal.style.display="none";
+  try{localStorage.setItem("shop_notice_seen_v1","1");}catch(_){}
 }
 </script>
 <header><div class="brand">RELX & ILIA</div><div class="header-actions"><button type="button" class="header-status-btn" onclick="showOrderLookup()">查詢訂單</button><button class="purple" onclick="showCart()">購物車 <span id="cc">0</span></button></div></header>
